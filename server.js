@@ -1,20 +1,33 @@
-// Load HTTP module
-const http = require("http");
+var express = require('express');
+var app = express();
+var path = require('path');
 
-const hostname = "127.0.0.1";
-const port = 8000;
+var pathToViews = path.join(__dirname + '/views/');
 
-// Create HTTP server
-const server = http.createServer((req, res) => {
-
-   // Set the response HTTP header with HTTP status and Content type
-   res.writeHead(200, {'Content-Type': 'text/plain'});
-
-   // Send the response body "Hello World"
-   res.end('Hello World\n');
+//loads the index page into the browser
+app.get('/', function(req, res) {
+    res.sendFile(path.join(pathToViews + 'index.html'));
 });
 
-// Prints a log once the server starts listening
-server.listen(port, hostname, () => {
-   console.log(`Server running at http://${hostname}:${port}/`);
-})
+//loads the index page into the browser
+app.get('/index', function(req, res) {
+    res.sendFile(path.join(pathToViews + 'index.html'));
+});
+
+//loats the network.html page into the browser
+app.get('/network', function(req, res) {
+    res.sendFile(path.join(pathToViews + 'network.html'));
+});
+
+//returns the network data for the specified subject area
+app.get('/subjectAreaCourses', function(req, res) {
+   var organization = req.query.organization;
+   if(organization != null){
+     res.json({ organization: organization });
+   }
+
+});
+
+
+
+app.listen(8080);

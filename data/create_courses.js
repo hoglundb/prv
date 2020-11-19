@@ -14,13 +14,96 @@ var computerScienceSubjectArea = new Imports.SubjectArea("Computer Science");
 //add math courses/prereqs to the math subject area
 AddMathCourses();
 
-
+addMathMajorOptions();
 
 prereqCreator.addSubjectArea(mathSubjectArea);
 prereqCreator.addSubjectArea(businessSubjectArea);
 prereqCreator.addSubjectArea(computerScienceSubjectArea);
 console.log(JSON.stringify(prereqCreator));
 //console.log(organization.subjectAreas[0].courses)
+
+
+
+function addMathMajorOptions(){
+
+  //add the applied option data
+   var option1 = new Imports.MajorOption("Applied and Computational Mathematics");
+
+   var section1Courses = ["MTH 311","MTH 312","MTH 341","MTH 342","MTH 343","MTH 355","MTH 483"];
+   var section1Name = "Part A. Required Applied and Computational Mathematics Core Classes"
+   var section1 = new Imports.MajorOptionCategory(section1Name, section1Courses, 8);
+   option1.addCategory(section1)
+
+   var section2Courses = ["MTH 420","MTH 440","MTH 441","MTH 451","MTH 452","MTH 453","MTH 480","MTH 481","MTH 482"];
+   var section2Name = "Part B. Area Course Work"
+   var section2 = new Imports.MajorOptionCategory(section2Name, section2Courses, 5);
+   option1.addCategory(section2)
+
+   var section3Courses = ["MTH 361","MTH 463","ST 351","ST 421"];
+   var section3Name = "Part B. Area Course Work"
+   var section3 = new Imports.MajorOptionCategory(section3Name, section3Courses, 1);
+   option1.addCategory(section3)
+
+   //add the math biology requirement
+   var option2 = new Imports.MajorOption("Mathematical Biology");
+
+   var section1Courses = ["BI 221","BI 222","BI 223","MTH 251","252","MTH 253","MTH 254","MTH 255","MTH 256","CH 231","CH 261"];
+   var section1Name = "Lower-Division Requirements"
+   var section1 = new Imports.MajorOptionCategory(section1Name, section1Courses, 11);
+   option2.addCategory(section1)
+
+   var section2Courses = ["MTH 311","MTH 312","MTH 341","MTH 341","MTH 343","MTH 355","MTH 480","MTH 481","MTH 482"];
+   var section2Name = "Part A: Required Mathematics Core Courses"
+   var section2 = new Imports.MajorOptionCategory(section2Name, section2Courses, 6);
+   option2.addCategory(section2)
+
+   var section3Courses = ["MTH 323","MTH 333","MTH 338"];
+   var section3Name = "WIC"
+   var section3 = new Imports.MajorOptionCategory(section3Name, section3Courses, 1);
+   option2.addCategory(section3)
+
+   var section4Courses = ["MTH 419","MTH 430","MTH 438"];
+   var section4Name = "Part C: Directed Electives"
+   var section4 = new Imports.MajorOptionCategory(section4Name, section4Courses, 1);
+   option2.addCategory(section4)
+
+   var section5Courses = ["MTH 420","MTH 440","MTH 441","MTH 464","MTH 482"];
+   var section5Name = "Part C: Directed Electives"
+   var section5 = new Imports.MajorOptionCategory(section5Name, section5Courses, 1);
+   option2.addCategory(section5)
+
+   var section6Courses = ["MTH 351","MTH 451","MTH 452"];
+   var section6Name = "Part C: Directed Electives"
+   var section6 = new Imports.MajorOptionCategory(section6Name, section6Courses, 1);
+   option2.addCategory(section6)
+
+   var option3 = new Imports.MajorOption("Secondary Teaching Emphasis Option");
+
+   var section1Courses = ["MTH 251","MTH 252","MTH 253","PH 211"];
+   var section1Name = "First Year"
+   var section1 = new Imports.MajorOptionCategory(section1Name, section1Courses, 4);
+   option3.addCategory(section1)
+
+   var section2Courses = ["MTH 251","MTH 252","MTH 253","PH 211"];
+   var section2Name = "Second Year"
+   var section2 = new Imports.MajorOptionCategory(section2Name, section2Courses, 4);
+   option3.addCategory(section2)
+
+   var section3Courses = ["MTH 311","MTH 312","MTH 338","MTH 342","MTH 343","MTH 355","MTH 361"];
+   var section3Name = "Third Year"
+   var section3 = new Imports.MajorOptionCategory(section3Name, section3Courses, 4);
+   option3.addCategory(section3)
+
+   var section4Courses = ["MTH 491","MTH 492","MTH 493","MTH 342","MTH 343","MTH 355","MTH 361"];
+   var section4Name = "Fourth Year"
+   var section4 = new Imports.MajorOptionCategory(section4Name, section4Courses, 4);
+   option3.addCategory(section4)
+
+   mathSubjectArea.addMajorOption(option1)
+   mathSubjectArea.addMajorOption(option2)
+   mathSubjectArea.addMajorOption(option3)
+}
+
 
 function AddMathCourses(){
   var courseName = "Mth 065";
@@ -439,9 +522,11 @@ function SpecialCase1(courseName, courseTitle, courseDescription, a, b, c, d){
 
 }
 
+
 function printJson(text){
     console.log(JSON.stringify(text));
 }
+
 //course that dont have nested prereq options. Or options are comma seperated
 function CreateGenericCourse(prereqsList, courseName, courseTitle, courseDescription){
 

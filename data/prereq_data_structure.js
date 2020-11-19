@@ -28,12 +28,36 @@ class Organization{
 class SubjectArea{
   constructor(_name){
     this.name = null;
-    this.courses = [];    
+    this.courses = [];
+    this.majorOptions = [];
     if(_name) this.name = _name;
   }
 
   addCourseWithPrereqs(_course){
      this.courses.push(_course);
+  }
+
+  addMajorOption(_majorOption){
+    this.majorOptions.push(_majorOption);
+  }
+}
+
+class MajorOption{
+  constructor(_name){
+      this.name = _name;
+      this.categories = [];
+  }
+
+  addCategory(_section){
+    this.categories.push(_section);
+  }
+}
+
+class MajorOptionCategory{
+  constructor(_sectionName, _courses, _numberRequired){
+     this.name = _sectionName;
+     this.courses = _courses;
+     this.numberRequired = _numberRequired;
   }
 }
 
@@ -102,3 +126,5 @@ module.exports.Connection = Connection;
 module.exports.Node = Node;
 module.exports.SubjectArea = SubjectArea;
 module.exports.Organization = Organization;
+module.exports.MajorOption = MajorOption;
+module.exports.MajorOptionCategory = MajorOptionCategory;

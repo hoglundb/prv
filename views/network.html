@@ -34,23 +34,23 @@
   <main class="main">
     <aside class="sidebar">
       <div class="form-group" style="margin-top:60px; margin-left:4%">
-      <label for="subjectArea" style="font-size:14px">Subject Area</label>
-     <select class="form-control" id="subjectArea" style="width:95%;">
+      <label for="subjectAreaDropdown" style="font-size:14px">Subject Area</label>
+     <select class="form-control" id="subjectAreaDropdown" style="width:95%;">
        <option selected disabled>--Select--</option>
      </select>
     </div>
    <div id="networkTypeDropdownSection" class="form-group" style="margin-top:30px; margin-left:4%">
    <label for="networkTypeDropdown" style="font-size:14px">Network Type</label>
   <select class="form-control" id="networkTypeDropdown" style="width:95%;">
-    <option selected disabled>--Select--</option>
-    <option id="subjectAreaOption" value="subjectAreaOption">Subject Area</option>
+    <option disabled>--Select--</option>
+    <option selected id="subjectAreaOption" value="subjectAreaOption">Subject Area</option>
     <option id="majorOption" value="majorOption">Major</option>
   </select>
  </div>
   <div id="majorOptionDropdownSection" class="form-group" style="display:none; margin-top:30px; margin-left:4%">
-  <label for="majorOption" style="font-size:14px">Major Option</label>
-  <select class="form-control" id="majorOption" style="width:95%;">
-   <option selected disabled>--Select--</option>
+  <label for="majorOptionsDropdown" style="font-size:14px">Major Option</label>
+  <select class="form-control" id="majorOptionsDropdown" style="width:95%;">
+   <option selected disabled value='0'>--Select--</option>
 </div>
 </select>
   </aside>

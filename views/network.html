@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<title>W3.CSS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<head>
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+<style>
+    @import url('https://fonts.googleapis.com/css?family=Open+Sans');
+
+    html {
+      font-family: Arial;
+      font-size: 16px;
+    }
+
+    .sidebar {
+      position: fixed;
+      width: 25%;
+      height: 100vh;
+      background: lightgrey;
+      font-size: 0.65em;
+    }
+
+
+
+
+  </style>
+ </head>
+<body>
+
+  <main class="main">
+    <aside class="sidebar">
+      <div class="form-group" style="margin-top:60px; margin-left:4%">
+      <label for="subjectArea" style="font-size:14px">Subject Area</label>
+     <select class="form-control" id="subjectArea" style="width:95%;">
+       <option selected disabled>--Select--</option>
+     </select>
+    </div>
+   <div id="networkTypeDropdownSection" class="form-group" style="margin-top:30px; margin-left:4%">
+   <label for="networkTypeDropdown" style="font-size:14px">Network Type</label>
+  <select class="form-control" id="networkTypeDropdown" style="width:95%;">
+    <option selected disabled>--Select--</option>
+    <option id="subjectAreaOption" value="subjectAreaOption">Subject Area</option>
+    <option id="majorOption" value="majorOption">Major</option>
+  </select>
+ </div>
+  <div id="majorOptionDropdownSection" class="form-group" style="display:none; margin-top:30px; margin-left:4%">
+  <label for="majorOption" style="font-size:14px">Major Option</label>
+  <select class="form-control" id="majorOption" style="width:95%;">
+   <option selected disabled>--Select--</option>
+</div>
+</select>
+  </aside>
+  </main>
+  <script type="text/javascript" src="network.js"> </script>
+</body>
+</html>

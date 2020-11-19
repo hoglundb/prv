@@ -7,13 +7,19 @@ var organization = new Imports.Organization("oregon state university");
 
 var mathSubjectArea = new Imports.SubjectArea("Mathematics");
 
+var businessSubjectArea = new Imports.SubjectArea("Business");
+
+var computerScienceSubjectArea = new Imports.SubjectArea("Computer Science");
+
 //add math courses/prereqs to the math subject area
-var rootNode = AddMathCourses();
+AddMathCourses();
 
-organization.addSubjectArea(mathSubjectArea);
-prereqCreator.addOrganization(organization)
 
-//console.log(JSON.stringify(prereqCreator));
+
+prereqCreator.addSubjectArea(mathSubjectArea);
+prereqCreator.addSubjectArea(businessSubjectArea);
+prereqCreator.addSubjectArea(computerScienceSubjectArea);
+console.log(JSON.stringify(prereqCreator));
 //console.log(organization.subjectAreas[0].courses)
 
 function AddMathCourses(){

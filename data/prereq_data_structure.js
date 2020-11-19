@@ -1,12 +1,12 @@
 class PrereqCreator {
 
   constructor(){
-    this.organizations = [];
+    this.subjectAreas = [];
   }
 
 
-  addOrganization(organization){
-    this.organizations.push(organization);
+  addSubjectArea(_subjectArea){
+    this.subjectAreas.push(_subjectArea);
   }
 
 
@@ -27,8 +27,8 @@ class Organization{
 
 class SubjectArea{
   constructor(_name){
-    this.courses = [];
     this.name = null;
+    this.courses = [];    
     if(_name) this.name = _name;
   }
 

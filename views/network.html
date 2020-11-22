@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-
+<link href="vis.css" rel="stylesheet" type="text/css"/>
 <style>
     @import url('https://fonts.googleapis.com/css?family=Open+Sans');
 
@@ -16,22 +16,31 @@
       font-size: 16px;
     }
 
-    .sidebar {
-      position: fixed;
-      width: 25%;
-      height: 100vh;
-      background: lightgrey;
-      font-size: 0.65em;
-    }
 
 
+    #myNetwork {
+      margin-left:23%;
+      width: 60%;
+      height: 80vh;
+      border: 1px solid lightgray;
 
+  }
 
+  .sidebar {
+    position: fixed;
+    width: 25%;
+    height: 100vh;
+    background: lightgrey;
+    font-size: 0.65em;
+    max-width: 21%;
+  }
   </style>
+  <script>
+
+
+  </script>
  </head>
 <body>
-
-  <main class="main">
     <aside class="sidebar">
       <div class="form-group" style="margin-top:60px; margin-left:4%">
       <label for="subjectAreaDropdown" style="font-size:14px">Subject Area</label>
@@ -51,10 +60,28 @@
   <label for="majorOptionsDropdown" style="font-size:14px">Major Option</label>
   <select class="form-control" id="majorOptionsDropdown" style="width:95%;">
    <option selected disabled value='0'>--Select--</option>
+   </select>
 </div>
-</select>
+
+<div id="courseDropdownArea" class="form-group" style=" margin-top:30px; margin-left:4%">
+<label for="courseSelectionDropdown" style="font-size:14px">Course</label>
+<select class="form-control" id="courseSelectionDropdown" style="width:95%;">
+ <option selected value='All'>All</option>
+ </select>
+</div>
+
+
+<div id="generateButtonArea" class="form-group" style=" margin-top:30px; margin-left:4%">
+
+<input id="generateButton" type="button" class="btn btn-info" value="Generate">
+</div>
   </aside>
-  </main>
-  <script type="text/javascript" src="network.js"> </script>
+
+  <div style="padding-top:50px">
+ <div id="myNetwork" style="border:solid"> </div>
+  </div>
+     <script src="vis.js"></script>
+    <script type="text/javascript" src="graph.js"> </script>
+    <script type="text/javascript" src="network.js"> </script>
 </body>
 </html>

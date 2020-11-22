@@ -20,9 +20,7 @@ async function getMajorOptions(dbo, _subjectArea){
   var majorOptions = [];
   queryResult.subjectAreas.forEach(function(subjectArea){
    if(subjectArea.name == _subjectArea){
-      console.log(subjectArea.majorOptions)
      subjectArea.majorOptions.forEach(function(op){
-       console.log(op.name)
          majorOptions.push(op.name)
      })
    }
@@ -32,9 +30,77 @@ async function getMajorOptions(dbo, _subjectArea){
 }
 
 
+//querries for the network data for the specified subject area
+async function getSubjectAreaNetworkData(_dbo, _subjectArea){
+     var queryResult = await _getSubjectAreasHelper(_dbo);
+     var courses = null;
+     queryResult.subjectAreas.forEach(function(subjectArea){
+      if(subjectArea.name == _subjectArea){
+        courses = subjectArea.courses;
+      }
+    });
+    return courses;
+}
+
+
+//querries for the network data for the specific course within the specified subject area
+async function getNetworkForCourse(_dbo, _subjectArea, _courseName){
+    var queryResult = await _getSubjectAreasHelper(_dbo);
+    var courses = [];
+    queryResult.subjectAreas.forEach(function(subjectArea){
+      if(subjectArea.name == _subjectArea){
+        subjectArea.courses.forEach(function(course){
+           if(course.name == _courseName){
+              courses.push(course);
+           }          
+        });
+      }
+    });
+    return courses;
+}
+
+
+//returns a list of course names for the specified subject area
+async function getSubjectAreaCoursesList(_dbo, _subjectArea){
+   var queryResult = await _getSubjectAreasHelper(_dbo);
+   var courses = [];
+   queryResult.subjectAreas.forEach(function(subjectArea){
+       if(subjectArea.name == _subjectArea){
+           subjectArea.courses.forEach(function(course){
+               courses.push(course.name);
+           });
+       }
+   });
+   return courses;
+}
+
+
+//get the list of all courses in the specified subject area and major option. Query all defined categories within the major option
+async function getMajorOptionCoursesList(_dbo, _subjectArea, _majorOption){
+  var queryResult = await _getSubjectAreasHelper(_dbo);
+  var courses = [];
+  queryResult.subjectAreas.forEach(function(subjectArea){
+    if(subjectArea.name == _subjectArea){
+        subjectArea.majorOptions.forEach(function(majorOption){
+          if(majorOption.name == _majorOption){
+            majorOption.categories.forEach(function(category){
+              category.courses.forEach(function(course){
+                courses.push(course);
+              })
+            })
+          }
+        })
+    }
+  })
+  return courses;
+}
+
 
 module.exports = {
-
    getSubjectAreas: getSubjectAreas,
-   getMajorOptions: getMajorOptions
+   getSubjectAreaNetworkData: getSubjectAreaNetworkData,
+   getNetworkForCourse: getNetworkForCourse,
+   getMajorOptions: getMajorOptions,
+   getSubjectAreaCoursesList: getSubjectAreaCoursesList,
+   getMajorOptionCoursesList:getMajorOptionCoursesList
 }

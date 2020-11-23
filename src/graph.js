@@ -494,7 +494,6 @@ function computeLayout(){
     var textB = _getPostfix(b.id);
     return (textA > textB) ? -1 : (textA < textB) ? 1 : 0;
   }).reverse();
-  console.log(nodes)
   //assign x,y positions based on course id and level
   curLevel = nodes[0].level;
   nodes.forEach(function(n){

@@ -21,16 +21,36 @@ async function main(){
   addEventListeners();
   await buildSubjectAreaDropdown();
   await buildCoursesDropdown(null);
- await generateNetwork();
-  await buildLegend();
+  await generateNetwork();
+  await tmpDisableDropdownOptions();
 }
 
 
+function tmpDisableDropdownOptions(){
+
+  $("#subjectAreaDropdown option").each(function()
+  {
+    if($(this).val() == "Computer Science" || $(this).val() == "Business"){
+        $(this).prop("disabled", true)
+          $(this).css("background", "lightGrey")
+    }
+  });
+
+  $("#networkTypeDropdown option").each(function()
+  {
+    if($(this).text() == "Major"){
+        $(this).prop("disabled", true)
+          $(this).css("background", "lightGrey")
+    }
+  });
+}
+
 function buildLegend(){
 
-   var foo = document.getElementById("legend");
-   foo.style.display = "inline"
-   document.getElementById("myNetwork").prepend(foo)
+   var legendBlueprint = document.getElementById("legend");
+   var legend = legendBlueprint.cloneNode(true)
+   legend.style.display="inline"
+   document.getElementById("myNetwork").prepend(legend)
 
 }
 
@@ -93,7 +113,7 @@ async function generateNetwork(){
     await  buildVisNetwork(data, subjectArea)
 
     }
-
+    await buildLegend();
 }
 
 

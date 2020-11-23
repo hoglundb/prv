@@ -39,8 +39,8 @@ function tmpDisableDropdownOptions(){
   $("#networkTypeDropdown option").each(function()
   {
     if($(this).text() == "Major"){
-        $(this).prop("disabled", true)
-          $(this).css("background", "lightGrey")
+      //  $(this).prop("disabled", true)
+      //    $(this).css("background", "lightGrey")
     }
   });
 }

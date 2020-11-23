@@ -9,40 +9,10 @@ let nodesList = [];
 var branchNodeCount = 0;
 
 //a crap ton of constants for drawing the vis network
-const nodeTypes = {
-  COURSE:'course',
-  PREREQ:'prereq',
-  BRANCH:'branch'
-}
-
-const nodeSizes = {
-   COURSE:18,
-   PREREQ:18,
-   BRANCH:7,
-}
-
-const nodeHighlightSizes = {
-   COURSE:25,
-   PREREQ:25,
-   BRANCH:12,
-}
-
-const nodeColors = {
-   BRANCH:"black",
-   COURSE:"#80CDFF",
-   PREREQ: "lightgray"
-}
-
-const selectedNodeColors = {
-  BRANCH:"black",
-  COURSE:"#FC8AFF",
-  PREREQ: "lightgray"
-}
-
-const highlightedNodeColors = {
-  BRANCH:"black",
-  COURSE:"#BDE5FF",
-  PREREQ: "lightgray"
+const NODE_TYPES = {
+  COURSE:{NAME:'course', SIZE:18, HIGHLIGHT_SIZE:25, COLOR:"#80CDFF", HIGHLIGHT_COLOR:"#BDE5FF", SELECTED_COLOR:"#FC8AFF"},
+  PREREQ:{NAME:'prereq', SIZE:18, HIGHLIGHT_SIZE:25, COLOR:"lightgray", HIGHLIGHT_COLOR:"lightgray", SELECTED_COLOR:"lightgray"},
+  BRANCH:{NAME:'branch', SIZE:7, HIGHLIGHT_SIZE:12, COLOR:"black", HIGHLIGHT_COLOR:"black", SELECTED_COLOR:"black"},
 }
 
 const NODE_SPACING = 130;
@@ -71,9 +41,9 @@ const EDGE_HIGHLIGHTED_WIDTH = 4
     name:course.name,
     label:course.name,
     description:course.description,
-    font:{size:nodeSizes.COURSE},
-    type:nodeTypes.COURSE,
-    color:nodeColors.COURSE,
+    font:{size:NODE_TYPES.COURSE.SIZE},
+    type:NODE_TYPES.COURSE.NAME,
+    color:NODE_TYPES.COURSE.COLOR,
     isHighlighted:false,
     isSelected:false,
   }
@@ -112,14 +82,6 @@ const EDGE_HIGHLIGHTED_WIDTH = 4
         physics:{
            enabled: false, //don't want this looking like jello
         },
-    /*   interaction:{hover:true},
-        layout: { hierarchical: {
-         sortMethod:  SORT_METHOD,
-         nodeSpacing: NODE_SPACING,
-       //  treeSpacing: TREE_SPACING,
-     //    levelSeparation: LEVEL_SEPARATION,
-     //    direction: DIRECTION,
-   },}*/
 }
 
 
@@ -138,11 +100,11 @@ visData = {
   visNetwork = new vis.Network(container, visData, options)
 
   //add event listenders for the vis network
-  addVisEventListeners();
+  visAddEventListeners();
 }
 
 
- function addVisEventListeners(){
+ function visAddEventListeners(){
 
   //click event for nodes in the network. This highlights the node and it's prereqs
   visNetwork.on("click", async function(e){
@@ -152,34 +114,8 @@ visData = {
      return;
    }
 
-   //unselect any nodes/edges
-   await setVisToDefault();
+   visOnNodeClick(visNodes.get(e.nodes[0]));
 
-   var clickedNode= visNodes.get(e.nodes[0]);
-
-   //skip non course nodes for now...
-   if(clickedNode.type != nodeTypes.COURSE) return;
-
-    //highlight the clicked node
-     visNodes.update({
-      id:clickedNode.id,
-      font:{size:getNodeHighlightSizeFromType(clickedNode.type)},
-      isSelected:true,
-      color:selectedNodeColors.COURSE,
-     });
-
-    //highlight nodes that are in the prereq subjectwork of the clicked node
-    var subNetwork = getPrereqSubNetwork(clickedNode, true);
-    for(var key in subNetwork){
-      var nodeToUpdate = subNetwork[key];
-      var highlightSize = await getNodeHighlightSizeFromType(nodeToUpdate.type);
-      visNodes.update({
-         id:nodeToUpdate.id,
-         font:{size:highlightSize},
-         isHighlighted:true,
-         color:getNodeHighlightColorFromType(nodeToUpdate.type),
-      });
-    }
   });
 
 
@@ -191,65 +127,80 @@ visData = {
      return;
    }
 
-
-   var clickedNode= visNodes.get(e.nodes[0]);
-   if(clickedNode.type == nodeTypes.BRANCH) return;
-   $("#courseSelectionDropdown").val(clickedNode.id);
-   generateNetwork();
+   visOnNodeDoubleClick(visNodes.get(e.nodes[0]));
  });
 }
 
 
+//called when a node in the vis network is clicked
+async function visOnNodeClick(clickedNode){
+  //skip non course nodes for now...
+  if(clickedNode.type != NODE_TYPES.COURSE.NAME) return;
+
+  //unselect any nodes/edges
+  await setVisToDefault();
+
+   //highlight the clicked node
+    visNodes.update({
+     id:clickedNode.id,
+     font:{size:getNodeHighlightSizeFromType(clickedNode.type)},
+     isSelected:true,
+     color:NODE_TYPES.COURSE.SELECTED_COLOR,
+    });
+
+   //highlight nodes that are in the prereq subjectwork of the clicked node
+   var subNetwork = getPrereqSubNetwork(clickedNode, true);
+   for(var key in subNetwork){
+     var nodeToUpdate = subNetwork[key];
+     var highlightSize = await getNodeHighlightSizeFromType(nodeToUpdate.type);
+     visNodes.update({
+        id:nodeToUpdate.id,
+        font:{size:highlightSize},
+        isHighlighted:true,
+        color:getNodeHighlightColorFromType(nodeToUpdate.type),
+     });
+   }
+}
+
+
+async function visOnNodeDoubleClick(clickedNode){
+  if(clickedNode.type == NODE_TYPES.BRANCH.NAME) return;
+  $("#courseSelectionDropdown").val(clickedNode.id);
+  generateNetwork();
+}
+
 //returns the highlighted node size based on the node type
 function getNodeHighlightSizeFromType(nodeType){
-  if(nodeType == nodeTypes.COURSE){
-     return nodeHighlightSizes.COURSE;
-  }
-  else if(nodeType == nodeTypes.BRANCH){
-     return nodeHighlightSizes.BRANCH;
-  }
-  else if(nodeType == nodeTypes.PREREQ){
-     return nodeHighlightSizes.PREREQ;
-  }
+  return  _getNodeTypeEnum(nodeType).HIGHLIGHT_SIZE;
 }
 
 
 function getNodeHighlightColorFromType(nodeType){
-  if(nodeType == nodeTypes.COURSE){
-     return highlightedNodeColors.COURSE;
-  }
-  else if(nodeType == nodeTypes.BRANCH){
-     return highlightedNodeColors.BRANCH;
-  }
-  else if(nodeType == nodeTypes.PREREQ){
-     return highlightedNodeColors.PREREQ;
-  }
+  return  _getNodeTypeEnum(nodeType).HIGHLIGHT_COLOR;
 }
 
 
 function getNodeColorFromType(nodeType){
-  if(nodeType == nodeTypes.COURSE){
-     return nodeColors.COURSE;
-  }
-  else if(nodeType == nodeTypes.BRANCH){
-     return nodeColors.BRANCH;
-  }
-  else if(nodeType == nodeTypes.PREREQ){
-     return nodeColors.PREREQ;
-  }
+  return  _getNodeTypeEnum(nodeType).COLOR;
 }
 
 
 //returns the regular node size based on the node type
 function getNodeSizeFromType(nodeType){
-  if(nodeType == nodeTypes.COURSE){
-     return nodeSizes.COURSE;
+  return  _getNodeTypeEnum(nodeType).NAME;
+}
+
+
+//A helper function to return the node type enumeration (as defined in the global constants section) based on its name
+function _getNodeTypeEnum(nodeType){
+  if(nodeType == NODE_TYPES.COURSE.NAME){
+     return NODE_TYPES.COURSE;
   }
-  else if(nodeType == nodeTypes.BRANCH){
-     return nodeSizes.BRANCH;
+  else if(nodeType == NODE_TYPES.BRANCH.NAME){
+     return NODE_TYPES.BRANCH;
   }
-  else if(nodeType == nodeTypes.PREREQ){
-     return nodeSizes.PREREQ;
+  else if(nodeType == NODE_TYPES.PREREQ.NAME){
+     return NODE_TYPES.PREREQ;
   }
 }
 
@@ -283,7 +234,7 @@ function getPrereqSubNetwork(rootNode){
           var connectedNode = getVisNodeById(edge.to)
            highlightEdge(edge);
            nodes.push(connectedNode);
-           if(connectedNode.type == nodeTypes.BRANCH){
+           if(connectedNode.type == NODE_TYPES.BRANCH.NAME){
              nodes = nodes.concat( getPrereqSubNetwork(connectedNode))
            }
         }
@@ -360,9 +311,9 @@ function setVisToDefault(){
                             name:courseToAdd.name,
                             label:courseToAdd.name,
                             description:courseToAdd.description,
-                            font:{size:nodeSizes.PREREQ},
-                            color:nodeColors.PREREQ,
-                            type:nodeTypes.COURSE,
+                            font:{size:NODE_TYPES.PREREQ.SIZE},
+                            color:NODE_TYPES.PREREQ.COLOR,
+                            type:NODE_TYPES.COURSE.NAME,
                             isHighlighted:false,
                             isSelected:false,
                           }
@@ -390,9 +341,9 @@ function setVisToDefault(){
                //add the branch node
                var newNode = {
                  id:newNodeName,
-                 color:nodeColors.BRANCH,
-                 type:nodeTypes.BRANCH,
-                 font:{size:nodeSizes.BRANCH, color:nodeColors.BRANCH},
+                 color:NODE_TYPES.BRANCH.COLOR,
+                 type:NODE_TYPES.BRANCH.NAME,
+                 font:{size:NODE_TYPES.BRANCH.SIZE, color:NODE_TYPES.BRANCH.COLOR},
                  label:'00',
                  isHighlighted:false,
                  isSelected:false,
@@ -520,7 +471,7 @@ function computeLayout(){
   for(var key in nodesDataset){
       var n = nodesDataset[key];
       if(n.type != "course"){
-        var connections = getConnectedCourseNodes(n.id, nodeTypes.COURSE);
+        var connections = getConnectedCourseNodes(n.id, NODE_TYPES.COURSE.NAME);
         var xPos = 0;
         var yPos = 0;
         for(var key in connections){
@@ -545,7 +496,7 @@ function getCourseNodePointingToBranchNode(_nodeId){
   });
 
   var foundNode = getVisNodeById(nodeId);
-  if(foundNode.type == nodeTypes.BRANCH){
+  if(foundNode.type == NODE_TYPES.BRANCH.NAME){
     return getCourseNodePointingToBranchNode(foundNode.id)
   }
   else return foundNode

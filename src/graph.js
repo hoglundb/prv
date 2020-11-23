@@ -156,7 +156,8 @@ visData = {
    await setVisToDefault();
 
    var clickedNode= visNodes.get(e.nodes[0]);
-   console.log(clickedNode.type)
+
+   //skip non course nodes for now...
    if(clickedNode.type != nodeTypes.COURSE) return;
 
     //highlight the clicked node
@@ -492,15 +493,15 @@ function computeLayout(){
     var textA = _getPostfix(a.id);
     var textB = _getPostfix(b.id);
     return (textA > textB) ? -1 : (textA < textB) ? 1 : 0;
-  });
-
+  }).reverse();
+  console.log(nodes)
   //assign x,y positions based on course id and level
   curLevel = nodes[0].level;
   nodes.forEach(function(n){
 
   if(rowCount > 9){
   //  if(curLevel != n.level){
-      curY -= dy;
+      curY += dy;
       curX= xStart;
       rowCount = 0
     }
@@ -525,14 +526,29 @@ function computeLayout(){
         for(var key in connections){
             var con = connections[key];
             xPos += con.x;
-            yPos += con.level;
-
         }
-
+        var fromNode = getCourseNodePointingToBranchNode(n.id);
         n.x = xPos / connections.length
-        n.y = connections[0].y + .5 * dy;
+        n.y = fromNode.y - .5 * dy
       }
     }
+}
+
+
+//finds the course node connecting to this branch node. Need to recurse to back trach to a non-branch node
+function getCourseNodePointingToBranchNode(_nodeId){
+  var nodeId = null;
+  visEdges.forEach(function(edge){
+    if(edge.to == _nodeId){
+      nodeId = edge.from;
+    }
+  });
+
+  var foundNode = getVisNodeById(nodeId);
+  if(foundNode.type == nodeTypes.BRANCH){
+    return getCourseNodePointingToBranchNode(foundNode.id)
+  }
+  else return foundNode
 }
 
 

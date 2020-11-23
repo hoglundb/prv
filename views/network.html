@@ -9,6 +9,51 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 <link href="vis.css" rel="stylesheet" type="text/css"/>
 <style>
+.myarrow{
+  position:absolute;
+  top:0;
+  transform: rotate(90deg);
+}
+.line {
+  border-right: 0.2rem dashed grey;
+  display:inline-block;
+  height:5rem;
+}
+.line2{
+  border-right: 0.2rem solid grey;
+  display:inline-block;
+  height:5rem;
+}
+.arrow{
+position:absolute;
+  top:-0.3rem;
+  bottom:0;
+  height:1rem;
+  border-right: 0.2rem solid grey;
+  display: inline-block;
+}
+.right{
+  left:0.3rem;
+  transform: rotate(-45deg);
+}
+.left{
+  right:0.3rem;
+  transform: rotate(45deg);
+}
+
+.oval {
+  width: 36px;
+  height: 18px;
+  border-radius: 100px / 50px;
+}
+.dot {
+  height: 17px;
+  width: 17px;
+  background-color: black;
+  border-radius: 50%;
+  display: inline-block;
+}
+
     @import url('https://fonts.googleapis.com/css?family=Open+Sans');
 
     html {
@@ -75,9 +120,31 @@
 </div>
   </aside>
 
-  <div style="padding-top:50px">
- <div id="myNetwork" style="border:solid"> </div>
-  </div>
+<div style="padding-top:50px">
+
+  <div id = "legend" style="display:none">
+    <div style="position:absolute;margin-left:2px;margin-top:0px "> Required</div>
+    <div class="myarrow" style="position:absolute; margin-left:102px;margin-top:22px">
+      <span class="arrow left"></span>
+      <span class="line2"></span>
+      <span class="arrow right"></span>
+    </div>
+
+    <div style="position:absolute;margin-left:2px;margin-top:28px "> Optional</div>
+    <div class="myarrow" style="position:absolute; margin-left:102px;margin-top:49px">
+      <span class="arrow left"></span>
+      <span class="line"></span>
+      <span class="arrow right"></span>
+    </div>
+
+    <div style="position:absolute;margin-left:2px;margin-top:56px "> Logic branch</div>
+      <span class="dot" style="position:absolute;margin-top:58px; margin-left:87px"></span>
+ </div>
+ <div id="myNetwork" style="border:solid">
+
+</div>
+</div>
+
      <script src="vis.js"></script>
     <script type="text/javascript" src="graph.js"> </script>
     <script type="text/javascript" src="network.js"> </script>

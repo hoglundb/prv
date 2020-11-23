@@ -21,8 +21,18 @@ async function main(){
   addEventListeners();
   await buildSubjectAreaDropdown();
   await buildCoursesDropdown(null);
+ await generateNetwork();
+  await buildLegend();
 }
 
+
+function buildLegend(){
+
+   var foo = document.getElementById("legend");
+   foo.style.display = "inline"
+   document.getElementById("myNetwork").prepend(foo)
+
+}
 
 //add event listeners for dropdown changes and stuff
 async function addEventListeners(){

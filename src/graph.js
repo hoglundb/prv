@@ -193,6 +193,7 @@ visData = {
 
 
    var clickedNode= visNodes.get(e.nodes[0]);
+   if(clickedNode.type == nodeTypes.BRANCH) return;
    $("#courseSelectionDropdown").val(clickedNode.id);
    generateNetwork();
  });

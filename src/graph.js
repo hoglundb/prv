@@ -15,6 +15,7 @@ const NODE_TYPES = {
   BRANCH:{NAME:'branch', SIZE:7, HIGHLIGHT_SIZE:12, COLOR:"black", HIGHLIGHT_COLOR:"black", SELECTED_COLOR:"black"},
 }
 
+const SORT_METHOD = "directed";
 const NODE_SPACING = 130;
 const TREE_SPACING = 10;
 const LEVEL_SEPARATION = 130;
@@ -29,7 +30,7 @@ const EDGE_HIGHLIGHTED_WIDTH = 4
 
 //builds the vis data structure by calling "recurseNode()" on each course in the network data structure
  function buildVisNetwork(courses, _subjectArea){
-
+  console.log(currentNetworkType)
   visNodes = new vis.DataSet();
 
   //create the primary nodes
@@ -70,6 +71,7 @@ const EDGE_HIGHLIGHTED_WIDTH = 4
 
 
  options = {
+  layout:getNetworkLayoutOptions(),
   edges: {
           smooth: true,
           arrows: { to: true },
@@ -84,15 +86,13 @@ const EDGE_HIGHLIGHTED_WIDTH = 4
         },
 }
 
-
-
 visData = {
   nodes:visNodes,
   edges:visEdges
 }
 
   //compute custom layout for large networks. Use default Kamada Kawai for smaller networks
-  if(visNodes.length > 10){
+  if(currentNetworkLayout == LAYOUT_TYPES.COURSE_PROGRESSION){
       computeLayout()
   }
 
@@ -104,6 +104,25 @@ visData = {
 }
 
 
+//returns the layout json structure for vis to determine the layout algorithem to use
+function getNetworkLayoutOptions(){
+  var layout = {};
+  if(currentNetworkLayout == LAYOUT_TYPES.HIERARCHICAL){
+     layout = {
+        hierarchical: {
+        sortMethod:  SORT_METHOD,
+        nodeSpacing: NODE_SPACING,
+       //treeSpacing: TREE_SPACING,
+      //levelSeparation: LEVEL_SEPARATION,
+     //direction: DIRECTION,
+       }
+    }
+  }
+  return layout;
+}
+
+
+ //add event listeners for clicking on nodes in the vis network
  function visAddEventListeners(){
 
   //click event for nodes in the network. This highlights the node and it's prereqs
@@ -163,23 +182,27 @@ async function visOnNodeClick(clickedNode){
 }
 
 
+//called when a node in the vis network is double clicked
 async function visOnNodeDoubleClick(clickedNode){
   if(clickedNode.type == NODE_TYPES.BRANCH.NAME) return;
   $("#courseSelectionDropdown").val(clickedNode.id);
   generateNetwork();
 }
 
-//returns the highlighted node size based on the node type
+
+//returns the highlight size for the node of the given type
 function getNodeHighlightSizeFromType(nodeType){
   return  _getNodeTypeEnum(nodeType).HIGHLIGHT_SIZE;
 }
 
 
+//returns the highlight color for the node of the given type
 function getNodeHighlightColorFromType(nodeType){
   return  _getNodeTypeEnum(nodeType).HIGHLIGHT_COLOR;
 }
 
 
+//returns the color for the node of th given type
 function getNodeColorFromType(nodeType){
   return  _getNodeTypeEnum(nodeType).COLOR;
 }
@@ -244,6 +267,7 @@ function getPrereqSubNetwork(rootNode){
 }
 
 
+//highlights the specified edge in the vis network
 function highlightEdge(edge){
    edge.width = EDGE_HIGHLIGHTED_WIDTH;
    edge.color.color = EDGE_HIGHLIGHTED_COLOR;
@@ -390,6 +414,7 @@ function isCourseInNetwork(courseId){
 }
 
 
+//returns the edge (if it exists) in the vis network from node e1 to node e2
 function getEdgeInNetwork(e1, e2){
   var edgeResult = null;
   visEdges.forEach(function(edge){
@@ -399,6 +424,7 @@ function getEdgeInNetwork(e1, e2){
   });
   return edgeResult
 }
+
 
 //makes an ajax call to the server to get the data for the course in the specified subject area
  function getCourseDataAjax(_subjectArea, _courseName){
@@ -488,6 +514,7 @@ function computeLayout(){
 
 //finds the course node connecting to this branch node. Need to recurse to back trach to a non-branch node
 function getCourseNodePointingToBranchNode(_nodeId){
+
   var nodeId = null;
   visEdges.forEach(function(edge){
     if(edge.to == _nodeId){

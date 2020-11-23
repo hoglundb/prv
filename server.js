@@ -57,6 +57,12 @@ initializeDatabases().then(dbo => {
   });
 
 
+  app.get("/majorOptionNetworkData", async function(req, res){
+     var data = await querries.getMajorOptionNetworkData(dbo, req.query.subjectArea, req.query.majorOption);
+     await res.json({data});
+  });
+
+
   app.get("/networkForCourse", async function(req, res){
      var courses = await querries.getNetworkForCourse(dbo, req.query.subjectArea, req.query.course);
      await res.json({courses});

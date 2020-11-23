@@ -1,5 +1,9 @@
 
-
+const LAYOUT_TYPES = {
+   COURSE_PROGRESSION:"course progression",
+   HIERARCHICAL:"hierarchical",
+   KAMADA_KAWAI: "kamada kawai",
+}
 
 
 const modes = {
@@ -7,7 +11,8 @@ const modes = {
     MAJOR: 'major'
 }
 
-var networkType = modes.SUBJECT_AREA;
+var currentNetworkType = modes.SUBJECT_AREA;
+var currentNetworkLayout = LAYOUT_TYPES.COURSE_PROGRESSION;
 
 //call the main function when the page first loads
 document.addEventListener("load", main());
@@ -62,12 +67,12 @@ async function addEventListeners(){
 
           var ref = document.getElementById("majorOptionDropdownSection");
           if(e.target.value == "subjectAreaOption"){
-             networkType = modes.SUBJECT_AREA
+             currentNetworkType = modes.SUBJECT_AREA
              ref.style.display = "none";
           }
           else{
             buildMajorOptionDropdown();
-            networkType = modes.MAJOR;
+            currentNetworkType = modes.MAJOR;
             ref.style.display = "block"
           }
           await buildCoursesDropdown();
@@ -94,6 +99,20 @@ async function addEventListeners(){
       generateNetwork();
   });
 
+  //event listener for when the layout dropdown is changed
+  document.getElementById("layoutDropdown").addEventListener("change", function(e){
+      var selectedLayout = $("#layoutDropdown").find(":selected").val();
+      if(selectedLayout == LAYOUT_TYPES.COURSE_PROGRESSION){
+        currentNetworkLayout = LAYOUT_TYPES.COURSE_PROGRESSION;
+      }
+      else if(selectedLayout == LAYOUT_TYPES.HIERARCHICAL){
+        currentNetworkLayout = LAYOUT_TYPES.HIERARCHICAL;
+      }
+      else{
+        currentNetworkLayout = LAYOUT_TYPES.KAMADA_KAWAI;
+      }
+      generateNetwork();
+  });
 
 }
 
@@ -102,7 +121,7 @@ async function addEventListeners(){
 async function generateNetwork(){
     var courseSelection = $("#courseSelectionDropdown").find(":selected").text();
     var subjectArea =  $('#subjectAreaDropdown').find(":selected").text();
-    if(networkType == modes.SUBJECT_AREA){
+    if(currentNetworkType == modes.SUBJECT_AREA){
       if(courseSelection == "All"){
         var data = await getSubjectAreaNetworkDataAjax(subjectArea);
       }
@@ -112,6 +131,12 @@ async function generateNetwork(){
 
     await  buildVisNetwork(data, subjectArea)
 
+    }
+
+    else if(currentNetworkType == modes.MAJOR){
+       var selectedMajorOption = $("#majorOptionsDropdown").find(":selected").text();
+       var data = await getMajorOptionNetworkDataAjax(subjectArea, selectedMajorOption);
+       console.log(data)
     }
     await buildLegend();
 }
@@ -127,7 +152,7 @@ function validateDropdownSelections(){
 //builds the dropdown list for the courses. Depends on networkType, subjectArea, and major option
 async function buildCoursesDropdown(_defaultMajorOption){
      var subjectArea =  $('#subjectAreaDropdown').find(":selected").text();
-     var networkType = $('#networkTypeDropdown').find(":selected").text();
+     var currentNetworkType = $('#networkTypeDropdown').find(":selected").text();
      //reference the dropdown and remove previous non-default values
      var dropdownRef = $("#courseSelectionDropdown")
      dropdownRef.find("option:gt(0)").remove();
@@ -135,10 +160,10 @@ async function buildCoursesDropdown(_defaultMajorOption){
      //get the dropdown data depending on the other dropdown selections
      var data = null;
 
-     if(networkType == "Subject Area"){
+     if(currentNetworkType == "Subject Area"){
         var data = await getSubjectAreaCoursesListAjax(subjectArea);
      }
-     else if(networkType == "Major"){
+     else if(currentNetworkType == "Major"){
         var majorOption = _defaultMajorOption;
         if(!majorOption){
            majorOption = $("#majorOptionsDropdown").find(":selected").text()
@@ -228,6 +253,11 @@ function getSubjectAreaCoursesListAjax(subjectArea){
 
 function getMajorOptionCoursesListAjax(_subjectArea, _majorOption){
   return $.get("majorOptionCoursesList" + "?subjectArea=" + _subjectArea + "&majorOption=" + _majorOption, function(data){});
+}
+
+
+function getMajorOptionNetworkDataAjax(_subjectArea, _majorOption){
+  return $.get("majorOptionNetworkData" + "?" + "subjectArea=" + _subjectArea + "&" + "majorOption=" + _majorOption)
 }
 
 

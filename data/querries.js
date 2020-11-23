@@ -43,6 +43,22 @@ async function getSubjectAreaNetworkData(_dbo, _subjectArea){
 }
 
 
+async function getMajorOptionNetworkData(_dbo, _subjectArea, _majorOption){
+   var queryResult = await _getSubjectAreasHelper(_dbo);
+   var data = null;
+   queryResult.subjectAreas.forEach(function(subjectArea){
+      if(subjectArea.name == _subjectArea){
+        subjectArea.majorOptions.forEach(function(majorOption){
+          if(majorOption.name == _majorOption){
+            data = majorOption;
+          }
+        })
+      }
+   });
+   return data;
+}
+
+
 //querries for the network data for the specific course within the specified subject area
 async function getNetworkForCourse(_dbo, _subjectArea, _courseName){
     var queryResult = await _getSubjectAreasHelper(_dbo);
@@ -52,7 +68,7 @@ async function getNetworkForCourse(_dbo, _subjectArea, _courseName){
         subjectArea.courses.forEach(function(course){
            if(course.name == _courseName){
               courses.push(course);
-           }          
+           }
         });
       }
     });
@@ -99,6 +115,7 @@ async function getMajorOptionCoursesList(_dbo, _subjectArea, _majorOption){
 module.exports = {
    getSubjectAreas: getSubjectAreas,
    getSubjectAreaNetworkData: getSubjectAreaNetworkData,
+   getMajorOptionNetworkData:getMajorOptionNetworkData,
    getNetworkForCourse: getNetworkForCourse,
    getMajorOptions: getMajorOptions,
    getSubjectAreaCoursesList: getSubjectAreaCoursesList,

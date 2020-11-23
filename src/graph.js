@@ -22,15 +22,27 @@ const nodeSizes = {
 }
 
 const nodeHighlightSizes = {
-   COURSE:30,
-   PREREQ:30,
-   BRANCH:14,
+   COURSE:25,
+   PREREQ:25,
+   BRANCH:12,
 }
 
 const nodeColors = {
    BRANCH:"black",
-   COURSE:"#81DDFD",
+   COURSE:"#80CDFF",
    PREREQ: "lightgray"
+}
+
+const selectedNodeColors = {
+  BRANCH:"black",
+  COURSE:"#FC8AFF",
+  PREREQ: "lightgray"
+}
+
+const highlightedNodeColors = {
+  BRANCH:"black",
+  COURSE:"#BDE5FF",
+  PREREQ: "lightgray"
 }
 
 const NODE_SPACING = 130;
@@ -40,8 +52,8 @@ const LEVEL_SEPARATION = 130;
 const EDGE_COLOR = "grey";
 const EDGE_WIDTH = .2;
 
-const EDGE_HIGHLIGHTED_COLOR = "red";
-const EDGE_HIGHLIGHTED_WIDTH = 10;
+const EDGE_HIGHLIGHTED_COLOR = "#F94CFF";
+const EDGE_HIGHLIGHTED_WIDTH = 4
 
 
 
@@ -62,7 +74,8 @@ const EDGE_HIGHLIGHTED_WIDTH = 10;
     font:{size:nodeSizes.COURSE},
     type:nodeTypes.COURSE,
     color:nodeColors.COURSE,
-    isHighlighted:false
+    isHighlighted:false,
+    isSelected:false,
   }
   nodesList.push(node);
   visNodes.add(node);
@@ -131,7 +144,7 @@ visData = {
 
  function addVisEventListeners(){
 
-  //click event for nodes in the network
+  //click event for nodes in the network. This highlights the node and it's prereqs
   visNetwork.on("click", async function(e){
 
     //ignore clicks not on nodes
@@ -143,12 +156,15 @@ visData = {
    await setVisToDefault();
 
    var clickedNode= visNodes.get(e.nodes[0]);
+   console.log(clickedNode.type)
+   if(clickedNode.type != nodeTypes.COURSE) return;
 
     //highlight the clicked node
      visNodes.update({
       id:clickedNode.id,
       font:{size:getNodeHighlightSizeFromType(clickedNode.type)},
-      isHighlighted:true,
+      isSelected:true,
+      color:selectedNodeColors.COURSE,
      });
 
     //highlight nodes that are in the prereq subjectwork of the clicked node
@@ -160,9 +176,25 @@ visData = {
          id:nodeToUpdate.id,
          font:{size:highlightSize},
          isHighlighted:true,
+         color:getNodeHighlightColorFromType(nodeToUpdate.type),
       });
     }
   });
+
+
+  //double clicking a node performs the same action as searching for it in the course selection dropdown
+  visNetwork.on("doubleClick", function(e){
+
+    //ignore clicks not on nodes
+   if(e == undefined || e.nodes == undefined || e.nodes[0] == undefined) {
+     return;
+   }
+
+
+   var clickedNode= visNodes.get(e.nodes[0]);
+   $("#courseSelectionDropdown").val(clickedNode.id);
+   generateNetwork();
+ });
 }
 
 
@@ -176,6 +208,32 @@ function getNodeHighlightSizeFromType(nodeType){
   }
   else if(nodeType == nodeTypes.PREREQ){
      return nodeHighlightSizes.PREREQ;
+  }
+}
+
+
+function getNodeHighlightColorFromType(nodeType){
+  if(nodeType == nodeTypes.COURSE){
+     return highlightedNodeColors.COURSE;
+  }
+  else if(nodeType == nodeTypes.BRANCH){
+     return highlightedNodeColors.BRANCH;
+  }
+  else if(nodeType == nodeTypes.PREREQ){
+     return highlightedNodeColors.PREREQ;
+  }
+}
+
+
+function getNodeColorFromType(nodeType){
+  if(nodeType == nodeTypes.COURSE){
+     return nodeColors.COURSE;
+  }
+  else if(nodeType == nodeTypes.BRANCH){
+     return nodeColors.BRANCH;
+  }
+  else if(nodeType == nodeTypes.PREREQ){
+     return nodeColors.PREREQ;
   }
 }
 
@@ -205,7 +263,6 @@ async function getPrereqSubNetworkEdges(nodes){
         var e = await getEdgeInNetwork(node1.id, node2.id);
 
         if(e != null){
-              console.log(e)
           edges.push(e)
         }
       }
@@ -222,7 +279,6 @@ function getPrereqSubNetwork(rootNode){
     visEdges.forEach(function(edge){
         if(edge.from == rootNode.id){
           var connectedNode = getVisNodeById(edge.to)
-           console.log(edge)
            highlightEdge(edge);
            nodes.push(connectedNode);
            if(connectedNode.type == nodeTypes.BRANCH){
@@ -246,11 +302,13 @@ function highlightEdge(edge){
 //resets any selected/highlighted items in the vis network. Called before click events on the vis network
 function setVisToDefault(){
     visNodes.forEach(function(node){
-          if(node.isHighlighted){
+          if(node.isHighlighted || node.isSelected){
             visNodes.update({
                id:node.id,
                font:{size:getNodeSizeFromType(node.type)},
-               isHighlighted:false
+               isHighlighted:false,
+               isSelected:false,
+               color: getNodeColorFromType(node.type),
             });
           }
 
@@ -304,6 +362,7 @@ function setVisToDefault(){
                             color:nodeColors.PREREQ,
                             type:nodeTypes.COURSE,
                             isHighlighted:false,
+                            isSelected:false,
                           }
                             nodesList.push(nodeToAdd);
                           visNodes.add(nodeToAdd);
@@ -333,11 +392,11 @@ function setVisToDefault(){
                  type:nodeTypes.BRANCH,
                  font:{size:nodeSizes.BRANCH, color:nodeColors.BRANCH},
                  label:'00',
-
                  isHighlighted:false,
+                 isSelected:false,
                }
 
-               visNodes.add(newNode);
+              visNodes.add(newNode);
               nodesList.push(newNode);
                //add the edge to the branch node
               let edge = {

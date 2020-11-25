@@ -112,11 +112,11 @@ function AddNonSubjectAreaCourses(){
     AddNonSubjectAreaCourse(courseName, courseTitle);
 
     var courseName = "CH 231";
-    var courseTitle = "";
+    var courseTitle = "GENERAL CHEMESTRY";
     AddNonSubjectAreaCourse(courseName, courseTitle);
 
     var courseName = "CH 261";
-    var courseTitle = "";
+    var courseTitle = "General Chemistry Laboratory";
     AddNonSubjectAreaCourse(courseName, courseTitle);
 
     var courseName = "BI 311";

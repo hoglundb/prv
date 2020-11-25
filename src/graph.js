@@ -101,7 +101,7 @@ function _addMajorOptionToTable(text1, text2, ovalColor){
   var domRef = document.getElementById("majorOptionsSection");
   var item = document.createElement("div");
   item.style.fontWeight = "bold";
-  item.style.marginLeft = "3%";
+  item.style.marginLeft = "1%";
   item.innerText = text1;
 
   var oval = document.getElementById("myOval").cloneNode(true);
@@ -109,7 +109,7 @@ function _addMajorOptionToTable(text1, text2, ovalColor){
   oval.style.marginRight = "2%"
   oval.style.backgroundColor =  ovalColor
   var dis = document.createElement("div");
-  dis.style.marginLeft = "3%";
+  dis.style.marginLeft = "1%";
   dis.innerText = text2
 
 

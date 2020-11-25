@@ -8,6 +8,7 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 <link href="vis.css" rel="stylesheet" type="text/css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <style>
 .myarrow{
   position:absolute;
@@ -17,12 +18,12 @@
 .line {
   border-right: 0.2rem dashed grey;
   display:inline-block;
-  height:5rem;
+  height:4rem;
 }
 .line2{
   border-right: 0.2rem solid grey;
   display:inline-block;
-  height:5rem;
+  height:4rem;
 }
 .arrow{
 position:absolute;
@@ -83,6 +84,8 @@ position:absolute;
     font-size: 0.65em;
     max-width: 20%;
   }
+
+
   </style>
   <script>
   </script>
@@ -134,18 +137,32 @@ position:absolute;
 </div>
   </aside>
 
-<div style="padding-top:50px">
+    <!-- Input Group -->
+    <div class="col-lg-4" style="margin-left:19.6%;padding-top:20px">
+        <div class="form-group">
+            <div class="input-group" style="width:40%">
+                <input type="text" class="form-control"
+                       placeholder="Course Search" id="courseSearchInput"/>
+                <span class="input-group-addon">
+                    <i class="fa fa-search"></i>
+                </span>
+            </div>
+        </div>
+    </div>
 
+<div style="">
   <div id = "legend" style="display:none">
     <div style="position:absolute;margin-left:2px;margin-top:0px "> Required</div>
-    <div class="myarrow" style="position:absolute; margin-left:102px;margin-top:22px">
+      <div style="position:absolute;margin-left:145px;margin-top:0px "> 'and'</div>
+    <div class="myarrow" style="position:absolute; margin-left:95px;margin-top:48px">
       <span class="arrow left"></span>
       <span class="line2"></span>
       <span class="arrow right"></span>
     </div>
 
-    <div style="position:absolute;margin-left:2px;margin-top:28px "> Optional</div>
-    <div class="myarrow" style="position:absolute; margin-left:102px;margin-top:49px">
+    <div style="position:absolute;margin-left:2px;margin-top:30px "> Optional</div>
+    <div style="position:absolute;margin-left:145px;margin-top:30px "> 'or'</div>
+    <div class="myarrow" style="position:absolute; margin-left:95px;margin-top:77px">
       <span class="arrow left"></span>
       <span class="line"></span>
       <span class="arrow right"></span>

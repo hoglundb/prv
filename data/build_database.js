@@ -623,12 +623,15 @@ function SpecialCase2(courseName, courseTitle, courseDescription, a, b, c, d, e,
   orSet2.addConnection(new Imports.Connection(eNode, true));
   orSet2.addConnection(new Imports.Connection(fNode, true));
 
-  var fromRoot = new Imports.Node();
+/*  var fromRoot = new Imports.Node();
   fromRoot.addConnection(new Imports.Connection(aNode, false));
   fromRoot.addConnection(new Imports.Connection(orSet1, false));
-  fromRoot.addConnection(new Imports.Connection(orSet2, false));
+  fromRoot.addConnection(new Imports.Connection(orSet2, false));*/
 
-  rootNode.root.addConnection(new Imports.Connection(fromRoot, false));
+  rootNode.root.addConnection(aNode, false);
+  rootNode.root.addConnection(orSet1, false);
+  rootNode.root.addConnection(orset2, false);
+//  rootNode.root.addConnection(new Imports.Connection(fromRoot, false));
   mathSubjectArea.addCourseWithPrereqs(rootNode);
   courses.push(rootNode)
 

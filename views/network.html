@@ -41,17 +41,22 @@ position:absolute;
   transform: rotate(45deg);
 }
 
-.oval {
-  width: 36px;
-  height: 18px;
-  border-radius: 100px / 50px;
-}
+
 .dot {
   height: 17px;
   width: 17px;
   background-color: black;
   border-radius: 50%;
   display: inline-block;
+}
+
+.oval{
+  height: 26px;
+  width: 45px;
+  background-color: red;
+  border-radius: 50%;
+  display: inline-block;
+
 }
 
     @import url('https://fonts.googleapis.com/css?family=Open+Sans');
@@ -62,8 +67,7 @@ position:absolute;
     }
 
 
-
-    #myNetwork {
+    #myNetworkk {
       margin-left:21.5%;
       width: 55%;
       height: 80vh;
@@ -86,38 +90,39 @@ position:absolute;
 <body>
     <aside class="sidebar">
       <div class="form-group" style="margin-top:60px; margin-left:4%">
-      <label for="subjectAreaDropdown" style="font-size:14px">Subject Area</label>
-     <select class="form-control" id="subjectAreaDropdown" style="width:95%;">
+      <label for="subjectAreaDropdown" style="font-size:18px">Subject Area</label>
+     <select class="form-control" id="subjectAreaDropdown" style="width:95%;font-size:16px">
        <option selected disabled>--Select--</option>
      </select>
     </div>
    <div id="networkTypeDropdownSection" class="form-group" style="margin-top:30px; margin-left:4%">
-   <label for="networkTypeDropdown" style="font-size:14px">Network Type</label>
-  <select class="form-control" id="networkTypeDropdown" style="width:95%;">
+   <label for="networkTypeDropdown" style="font-size:18px">Network Type</label>
+  <select class="form-control" id="networkTypeDropdown" style="width:95%;font-size:16px">
     <option disabled>--Select--</option>
     <option selected id="subjectAreaOption" value="subjectAreaOption">Subject Area</option>
     <option id="majorOption" value="majorOption">Major</option>
+    <option id="courseOption" value="courseOption">Course</option>
   </select>
  </div>
   <div id="majorOptionDropdownSection" class="form-group" style="display:none; margin-top:30px; margin-left:4%">
-  <label for="majorOptionsDropdown" style="font-size:14px">Major Option</label>
-  <select class="form-control" id="majorOptionsDropdown" style="width:95%;">
+  <label for="majorOptionsDropdown" style="font-size:18px">Major Option</label>
+  <select class="form-control" id="majorOptionsDropdown" style="width:95%;font-size:16px">
    <option selected disabled value='0'>--Select--</option>
    </select>
 </div>
 
-<div id="courseDropdownArea" class="form-group" style=" margin-top:30px; margin-left:4%">
-<label for="courseSelectionDropdown" style="font-size:14px">Course</label>
-<select class="form-control" id="courseSelectionDropdown" style="width:95%;">
- <option selected value='All'>All</option>
+<div id="courseDropdownArea" class="form-group" style=" margin-top:30px; margin-left:4% ; display:none">
+<label for="courseSelectionDropdown" style="font-size:18px">Course</label>
+<select class="form-control" id="courseSelectionDropdown" style="width:95%;font-size:16px">
+ <option selected disabled value='0'>--Select--</option>
  </select>
 </div>
 
 <div id="layoutDropdownArea" class="form-group" style=" margin-top:30px; margin-left:4%">
-<label for="layoutDropdown" style="font-size:14px">Network Layout</label>
-<select class="form-control" id="layoutDropdown" style="width:95%;">
- <option selected value='course progression'>Course Progression</option>
- <option  value='hierarchical'>Hierarchical</option>
+<label for="layoutDropdown" style="font-size:18px">Network Layout</label>
+<select class="form-control" id="layoutDropdown" style="width:95%;font-size:16px">
+  <option selected value='hierarchical'>Hierarchical</option>
+ <option value='course progression'>Course Progression</option>
  <option  value="kamada kawai">Kamada Kawai</option>
  </select>
 </div>
@@ -149,11 +154,16 @@ position:absolute;
     <div style="position:absolute;margin-left:2px;margin-top:56px "> Logic branch</div>
       <span class="dot" style="position:absolute;margin-top:58px; margin-left:87px"></span>
  </div>
- <div id="myNetwork" style="border:solid">
+
+ <div id="myOval" class="oval" style="float:left; width:60px; display:none"></div>
+ <div id="myNetwork" style="height: 80vh; border:solid; float:left; width:54%; margin-left:21.5%">
+
+</div>
+
+<div id="majorOptionsSection" style="margin-left:75.8%; margin-right:6px;">
 
 </div>
 </div>
-
      <script src="vis.js"></script>
     <script type="text/javascript" src="graph.js"> </script>
     <script type="text/javascript" src="network.js"> </script>

@@ -1,7 +1,7 @@
 //A script to create the database JSON object for the list of courses and their prereqs
 
 const Imports = require("./prereq_data_structure.js");
-
+const initializeDatabases = require('./db_context.js');
 var prereqCreator = new Imports.PrereqCreator();
 var organization = new Imports.Organization("oregon state university");
 
@@ -11,25 +11,165 @@ var businessSubjectArea = new Imports.SubjectArea("Business", "BIS", true);
 
 var computerScienceSubjectArea = new Imports.SubjectArea("Computer Science", "CS", true);
 
+var currentSubjectArea = "Mathematics";
+var courses = [];
+
+
+
+function InsertSubjectAreas(_dbo){
+     var db = _dbo.collection("osu_subject_areas");
+     db.deleteMany({});
+     db.insertMany([
+       {name:"Mathematics", abreviation:"MTH", majorOptions:getMathMajorOptions()},
+       {name:"Computer Science", abreviation:"CS"},
+       {name:"Business", abreviation:"BIS"}
+     ])
+}
+
 //add math courses/prereqs to the math subject area
 AddMathCourses();
 
-addMathMajorOptions();
+AddNonSubjectAreaCourses();
+
 
 prereqCreator.addSubjectArea(mathSubjectArea);
 prereqCreator.addSubjectArea(businessSubjectArea);
 prereqCreator.addSubjectArea(computerScienceSubjectArea);
-//console.log(JSON.stringify(prereqCreator));
-//console.log(organization.subjectAreas[0].courses)
+
+var coursesToAdd = [];
+for(var c in courses){
+
+  var course = courses[c];
+  coursesToAdd.push({subjectArea:course.subjectArea, name:course.name, title:course.title, root:course.root})
+}
+
+
+//open the database connection and insert the documents
+initializeDatabases().then(dbo => {
+
+  InsertSubjectAreas(dbo);
+
+  var db = dbo.collection("osu_courses");
+
+  db.deleteMany({});
+  db.insertMany(
+       coursesToAdd
+  );
+});
 
 
 
-function addMathMajorOptions(){
+console.log("done inserting")
 
+
+function AddNonSubjectAreaCourses(){
+    var courseName = "PH 211";
+    var courseTitle = "GENERAL PHYSICS WITH CALCULUS";
+    AddNonSubjectAreaCourse(courseName, courseTitle);
+
+    var courseName = "ST 351";
+    var courseTitle = "Introduction to Statistical Methods";
+    AddNonSubjectAreaCourse(courseName, courseTitle);
+
+    var courseName = "ST 421";
+    var courseTitle = "INTRODUCTION TO MATHEMATICAL STATISTICS";
+    AddNonSubjectAreaCourse(courseName, courseTitle);
+
+    var courseName = "ST 413";
+    var courseTitle = "METHODS OF DATA ANALYSIS";
+    AddNonSubjectAreaCourse(courseName, courseTitle);
+
+    var courseName = "ST 415";
+    var courseTitle = "DESIGN AND ANALYSIS OF PLANNED EXPERIMENTS";
+    AddNonSubjectAreaCourse(courseName, courseTitle);
+
+    var courseName = "ST 431";
+    var courseTitle = "SAMPLING METHODS";
+    AddNonSubjectAreaCourse(courseName, courseTitle);
+
+    var courseName = "ST 439";
+    var courseTitle = " SURVEY METHODS";
+    AddNonSubjectAreaCourse(courseName, courseTitle);
+
+    var courseName = "ST 441";
+    var courseTitle = "PROBABILITY, COMPUTING, AND SIMULATION IN STATISTICS";
+    AddNonSubjectAreaCourse(courseName, courseTitle);
+
+    var courseName = "ST 443";
+    var courseTitle = "APPLIED STOCHASTIC MODELS";
+    AddNonSubjectAreaCourse(courseName, courseTitle);
+
+    var courseName = "BI 221";
+    var courseTitle = "PRINCIPLES OF BIOLOGY: CELLS";
+    AddNonSubjectAreaCourse(courseName, courseTitle);
+
+    var courseName = "BI 222";
+    var courseTitle = "PRINCIPLES OF BIOLOGY: ORGANISMS";
+    AddNonSubjectAreaCourse(courseName, courseTitle);
+
+    var courseName = "BI 223";
+    var courseTitle = "PRINCIPLES OF BIOLOGY: POPULATIONS";
+    AddNonSubjectAreaCourse(courseName, courseTitle);
+
+    var courseName = "CH 231";
+    var courseTitle = "";
+    AddNonSubjectAreaCourse(courseName, courseTitle);
+
+    var courseName = "CH 261";
+    var courseTitle = "";
+    AddNonSubjectAreaCourse(courseName, courseTitle);
+
+    var courseName = "BI 311";
+    var courseTitle = "GENETICS";
+    AddNonSubjectAreaCourse(courseName, courseTitle);
+
+    var courseName = "BI 351";
+    var courseTitle = "MARINE ECOLOGY";
+    AddNonSubjectAreaCourse(courseName, courseTitle);
+
+    var courseName = "BI 370";
+    var courseTitle = "ECOLOGY";
+    AddNonSubjectAreaCourse(courseName, courseTitle);
+
+    var courseName = "BI 445";
+    var courseTitle = "EVOLUTION";
+    AddNonSubjectAreaCourse(courseName, courseTitle);
+
+    var courseName = "BOT 341";
+    var courseTitle = "PLANT ECOLOGY";
+    AddNonSubjectAreaCourse(courseName, courseTitle);
+
+    var courseName = "BOT 442";
+    var courseTitle = "LANT POPULATION ECOLOGY";
+    AddNonSubjectAreaCourse(courseName, courseTitle);
+
+    var courseName = "BOT 476";
+    var courseTitle = "INTRODUCTION TO COMPUTING IN THE LIFE SCIENCES";
+    AddNonSubjectAreaCourse(courseName, courseTitle);
+
+    var courseName = "CS 446";
+    var courseTitle = "NETWORKS IN COMPUTATIONAL BIOLOGY";
+    AddNonSubjectAreaCourse(courseName, courseTitle);
+
+    var courseName = "FW 320";
+    var courseTitle = "INTRODUCTORY POPULATION DYNAMICS";
+    AddNonSubjectAreaCourse(courseName, courseTitle);
+}
+
+
+function AddNonSubjectAreaCourse(_courseName, _courseTitle, _courseDescription){
+  //the root node of the course prereq heirarchy that this course
+  var rootNode = new Imports.Course(_courseName, _courseTitle, _courseDescription, "")
+   courses.push(rootNode);
+}
+
+//console.log(coursesToAdd)
+function getMathMajorOptions(){
+   var majorOptions = [];
   //add the applied option data
    var option1 = new Imports.MajorOption("Applied and Computational Mathematics");
 
-   var section1Courses = ["MTH 311","MTH 312","MTH 341","MTH 342","MTH 343","MTH 355","MTH 483"];
+   var section1Courses = ["MTH 311","MTH 312", "MTH 323", "MTH 341","MTH 342","MTH 343","MTH 355","MTH 483"];
    var section1Name = "Part A. Required Applied and Computational Mathematics Core Classes"
    var section1 = new Imports.MajorOptionCategory(section1Name, section1Courses, 8);
    option1.addCategory(section1)
@@ -52,7 +192,7 @@ function addMathMajorOptions(){
    var section1 = new Imports.MajorOptionCategory(section1Name, section1Courses, 11);
    option2.addCategory(section1)
 
-   var section2Courses = ["MTH 311","MTH 312","MTH 341","MTH 341","MTH 343","MTH 355","MTH 480","MTH 481","MTH 482"];
+   var section2Courses = ["MTH 311","MTH 312","MTH 341","MTH 341","MTH 343","MTH 355"];
    var section2Name = "Part A: Required Mathematics Core Courses"
    var section2 = new Imports.MajorOptionCategory(section2Name, section2Courses, 6);
    option2.addCategory(section2)
@@ -77,6 +217,11 @@ function addMathMajorOptions(){
    var section6 = new Imports.MajorOptionCategory(section6Name, section6Courses, 1);
    option2.addCategory(section6)
 
+   var section7Courses = ["BI 311","BI 351", "BI 370","BI 445","BOT 341","BOT 442","BOT 476","CS 446","FW 320"];
+   var section7Name = "Part C: Directed Electives"
+   var section7 = new Imports.MajorOptionCategory(section7Name, section7Courses, 1);
+   option2.addCategory(section7)
+
    var option3 = new Imports.MajorOption("Secondary Teaching Emphasis Option");
 
    var section1Courses = ["MTH 251","MTH 252","MTH 253","PH 211"];
@@ -84,7 +229,7 @@ function addMathMajorOptions(){
    var section1 = new Imports.MajorOptionCategory(section1Name, section1Courses, 4);
    option3.addCategory(section1)
 
-   var section2Courses = ["MTH 251","MTH 252","MTH 253","PH 211"];
+   var section2Courses = ["MTH 254","MTH 255","MTH 256","MTH 341"];
    var section2Name = "Second Year"
    var section2 = new Imports.MajorOptionCategory(section2Name, section2Courses, 4);
    option3.addCategory(section2)
@@ -94,18 +239,20 @@ function addMathMajorOptions(){
    var section3 = new Imports.MajorOptionCategory(section3Name, section3Courses, 4);
    option3.addCategory(section3)
 
-   var section4Courses = ["MTH 491","MTH 492","MTH 493","MTH 342","MTH 343","MTH 355","MTH 361"];
+   var section4Courses = ["MTH 491","MTH 492","MTH 493","SED 414","ST 351"];
    var section4Name = "Fourth Year"
    var section4 = new Imports.MajorOptionCategory(section4Name, section4Courses, 4);
    option3.addCategory(section4)
 
-   mathSubjectArea.addMajorOption(option1)
-   mathSubjectArea.addMajorOption(option2)
-   mathSubjectArea.addMajorOption(option3)
+   majorOptions.push(option1);
+   majorOptions.push(option2);
+   majorOptions.push(option3);
+   return majorOptions
 }
 
 
 function AddMathCourses(){
+
   var courseName = "MTH 065";
   var courseTitle = "ELEMENTARY ALGEBRA";
   var prereqs = [];
@@ -458,7 +605,7 @@ function AddMathCourses(){
 
   //Special case of the form (a & (b or c or d) & (e or f))
 function SpecialCase2(courseName, courseTitle, courseDescription, a, b, c, d, e, f){
-  var rootNode = new Imports.Course(courseName, courseTitle, courseDescription);
+  var rootNode = new Imports.Course(courseName, courseTitle, courseDescription, currentSubjectArea);
 
   var aNode = new Imports.Node(a);
   var bNode = new Imports.Node(b);
@@ -483,13 +630,14 @@ function SpecialCase2(courseName, courseTitle, courseDescription, a, b, c, d, e,
 
   rootNode.root.addConnection(new Imports.Connection(fromRoot, false));
   mathSubjectArea.addCourseWithPrereqs(rootNode);
+  courses.push(rootNode)
 
 }
 
 
 //handles the relationship (a or b or (c & d))
 function SpecialCase1(courseName, courseTitle, courseDescription, a, b, c, d){
-    var rootNode = new Imports.Course(courseName, courseTitle, courseDescription);
+    var rootNode = new Imports.Course(courseName, courseTitle, courseDescription, currentSubjectArea);
 
     var aNode = new Imports.Node(a);
     var bNode = new Imports.Node(b);
@@ -516,7 +664,7 @@ function SpecialCase1(courseName, courseTitle, courseDescription, a, b, c, d){
     fromRootNode.addConnection(fromRootConnection);
     rootNode.root.addConnection(fromRootConnection);
     mathSubjectArea.addCourseWithPrereqs(rootNode);
-
+    courses.push(rootNode);
 }
 
 
@@ -528,7 +676,7 @@ function printJson(text){
 function CreateGenericCourse(prereqsList, courseName, courseTitle, courseDescription){
 
   //the root node of the course prereq heirarchy that this course
-  var rootNode = new Imports.Course(courseName, courseTitle, courseDescription)
+  var rootNode = new Imports.Course(courseName, courseTitle, courseDescription, currentSubjectArea)
 
    for(var key in prereqsList){
 
@@ -551,7 +699,7 @@ function CreateGenericCourse(prereqsList, courseName, courseTitle, courseDescrip
        rootNode.root.addConnection(connection);
      }
    }
-
+   courses.push(rootNode);
    return rootNode;
 }
 

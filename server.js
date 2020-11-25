@@ -42,6 +42,7 @@ initializeDatabases().then(dbo => {
   //route to query for the list of subject areas
   app.get("/subjectAreas",  async function(req, res){
     var subjectAreas = await querries.getSubjectAreas(dbo)
+
     await res.json({subjectAreas});
   });
 
@@ -50,7 +51,7 @@ initializeDatabases().then(dbo => {
       await res.json({majorOptions});
   });
 
-
+ //fixme
   app.get("/subjectAreaNetworkData", async function(req, res){
       var courses = await querries.getSubjectAreaNetworkData(dbo, req.query.subjectArea)
       await res.json({courses});

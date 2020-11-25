@@ -26,8 +26,10 @@ class Organization{
 }
 
 class SubjectArea{
-  constructor(_name){
+  constructor(_name, _abrev, _isSelectable){
     this.name = null;
+    this.abreviation = _abrev;
+    this.isSelectable = _isSelectable;
     this.courses = [];
     this.majorOptions = [];
     if(_name) this.name = _name;
@@ -65,7 +67,8 @@ class MajorOptionCategory{
 class Course{
 
   //init the name, description for the course
-  constructor(_name, _title, _description) {
+  constructor(_name, _title, _description, _subjectArea) {
+      this.subjectArea = _subjectArea;
       this.name = _name;
       this.title = _title;
       this.description = _description;

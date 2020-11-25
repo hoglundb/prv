@@ -1,4 +1,5 @@
 
+
 const LAYOUT_TYPES = {
    COURSE_PROGRESSION:"course progression",
    HIERARCHICAL:"hierarchical",
@@ -8,11 +9,12 @@ const LAYOUT_TYPES = {
 
 const modes = {
     SUBJECT_AREA: 'subjectArea',
-    MAJOR: 'major'
+    MAJOR: 'major',
+    COURSE: 'course',
 }
 
 var currentNetworkType = modes.SUBJECT_AREA;
-var currentNetworkLayout = LAYOUT_TYPES.COURSE_PROGRESSION;
+var currentNetworkLayout = LAYOUT_TYPES.HIERARCHICAL;
 
 //call the main function when the page first loads
 document.addEventListener("load", main());
@@ -25,7 +27,6 @@ async function main(){
 
   addEventListeners();
   await buildSubjectAreaDropdown();
-  await buildCoursesDropdown(null);
   await generateNetwork();
   await tmpDisableDropdownOptions();
 }
@@ -63,23 +64,35 @@ function buildLegend(){
 async function addEventListeners(){
 
   //event listener for the subjectAreaDropdown
-  document.getElementById("networkTypeDropdown").addEventListener("change", async function(e){
+  document.getElementById("networkTypeDropdown").addEventListener("change",  async function(e){
 
           var ref = document.getElementById("majorOptionDropdownSection");
-          if(e.target.value == "subjectAreaOption"){
-             currentNetworkType = modes.SUBJECT_AREA
+           if(e.target.value == "courseOption"){
              ref.style.display = "none";
+             document.getElementById("courseDropdownArea").style.display = "block";
+             await buildCoursesDropdown();
+             currentNetworkType =  modes.COURSE;
+             generateNetwork();
           }
-          else{
-            buildMajorOptionDropdown();
+          else if(e.target.value == "subjectAreaOption"){
+             currentNetworkType = modes.SUBJECT_AREA
+             document.getElementById("courseDropdownArea").style.display = "none";
+             ref.style.display = "none";
+               generateNetwork()
+          }
+
+          else if(e.target.value == "majorOption"){
+            await buildMajorOptionDropdown();
             currentNetworkType = modes.MAJOR;
+            document.getElementById("courseDropdownArea").style.display = "none";
             ref.style.display = "block"
+            generateNetwork()
           }
-          await buildCoursesDropdown();
+
     })
 
   document.getElementById("majorOptionsDropdown").addEventListener("change", async function(e){
-        buildCoursesDropdown();
+      generateNetwork();
    });
 
   //action for the subjectAreaDropdown
@@ -119,24 +132,22 @@ async function addEventListeners(){
 
 //generates the network based on the courses selected in the courseSelectionDropdown.
 async function generateNetwork(){
-    var courseSelection = $("#courseSelectionDropdown").find(":selected").text();
     var subjectArea =  $('#subjectAreaDropdown').find(":selected").text();
     if(currentNetworkType == modes.SUBJECT_AREA){
-      if(courseSelection == "All"){
         var data = await getSubjectAreaNetworkDataAjax(subjectArea);
-      }
-      else{
-        var data = await getNetworkForCourseAjax(subjectArea, courseSelection);
-      }
-
-    await  buildVisNetwork(data, subjectArea)
-
+        await  buildVisNetwork(data, subjectArea)
     }
 
     else if(currentNetworkType == modes.MAJOR){
        var selectedMajorOption = $("#majorOptionsDropdown").find(":selected").text();
        var data = await getMajorOptionNetworkDataAjax(subjectArea, selectedMajorOption);
-       console.log(data)
+       buildVisNetwork(data, subjectArea)
+    }
+
+    else if(currentNetworkType == modes.COURSE){
+      var courseSelection = $("#courseSelectionDropdown").find(":selected").text();
+      var data = await getNetworkForCourseAjax(subjectArea, courseSelection);
+      await buildVisNetwork(data, subjectArea)
     }
     await buildLegend();
 }
@@ -152,7 +163,8 @@ function validateDropdownSelections(){
 //builds the dropdown list for the courses. Depends on networkType, subjectArea, and major option
 async function buildCoursesDropdown(_defaultMajorOption){
      var subjectArea =  $('#subjectAreaDropdown').find(":selected").text();
-     var currentNetworkType = $('#networkTypeDropdown').find(":selected").text();
+    var data = await getSubjectAreaCoursesListAjax(subjectArea);
+    /* var currentNetworkType = $('#networkTypeDropdown').find(":selected").text();
      //reference the dropdown and remove previous non-default values
      var dropdownRef = $("#courseSelectionDropdown")
      dropdownRef.find("option:gt(0)").remove();
@@ -169,7 +181,11 @@ async function buildCoursesDropdown(_defaultMajorOption){
            majorOption = $("#majorOptionsDropdown").find(":selected").text()
         }
          data = await getMajorOptionCoursesListAjax(subjectArea, majorOption);
-     }
+     }*/
+     var dropdownRef = $("#courseSelectionDropdown")
+     dropdownRef.find("option:gt(0)").remove();
+
+     //get the dropdown data depending on the other dropdown selections
   if(!data || !data.courses) {
     return console.error("Major option courses for dropdown not found");
 
@@ -177,25 +193,25 @@ async function buildCoursesDropdown(_defaultMajorOption){
      //build the dropdown
      $.each(data.courses, function(val, text){
        dropdownRef.append(
-         $('<option></option>').val(text).html(text)
+         $('<option></option>').val(text.name).html(text.name)
        );
      });
-     dropdownRef.val("All")
+     dropdownRef.val(data.courses[0].name)
 }
 
 
 
 //biulds the subjectArea dropdown drom the ajax response
 async function buildSubjectAreaDropdown(){
-  var data = await getSubjectAreasAjax()
+  var data = await getSubjectAreasAjax();
   $.each(data.subjectAreas, function(val, text){
        var dropdownRef = $("#subjectAreaDropdown");
        dropdownRef.append(
-       $('<option></option>').val(text).html(text)
+       $('<option></option>').val(text.name).html(text.name)
        );
   });
   //set the default to the first item
-  $("#subjectAreaDropdown").val(data.subjectAreas[0])
+  $("#subjectAreaDropdown").val(data.subjectAreas[0].name)
 }
 
 
@@ -206,23 +222,21 @@ async function buildMajorOptionDropdown(){
   selectList.find("option:gt(0)").remove();
 
   var dropdownSelection = $('#subjectAreaDropdown').find(":selected").text();
-  var majorOptions = await getMajorOptionsAjax(dropdownSelection);
-
+  var data = await getMajorOptionsAjax(dropdownSelection);
   const promise = new Promise(async (resolve, reject) => {
-
-     $.each(majorOptions.majorOptions, function(val, text){
+     $.each(data.majorOptions, function(val, text){
          var dropdownRef = $("#majorOptionsDropdown");
          dropdownRef.append(
-         $('<option></option>').val(text).html(text)
+         $('<option></option>').val(text.name).html(text.name)
          );
     });
-     selectList.val(majorOptions.majorOptions[1]);
+     selectList.val(data.majorOptions[1].name);
      await resolve();
   })
 
    promise.then((value)=>{
 
-        buildCoursesDropdown(majorOptions.majorOptions[1])
+      //  buildCoursesDropdown(data.majorOptions[1].name)
    })
 
 }
@@ -243,6 +257,19 @@ function getMajorOptionsAjax(subjectArea){
 
 function getSubjectAreaNetworkDataAjax(subjectArea){
        return $.get("subjectAreaNetworkData" + "?subjectArea=" + subjectArea, function(data){});
+}
+
+
+//makes an ajax call to the server to get the data for the course in the specified subject area
+ function getCourseDataAjax(_subjectArea, _courseName){
+  var url = "networkForCourse" + "?subjectArea=" + _subjectArea + "&course=" + _courseName;
+  return $.ajax({
+    url: url,
+    success: function (data) {
+       return data
+    },
+    async: false
+   });
 }
 
 

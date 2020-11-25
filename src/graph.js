@@ -337,7 +337,7 @@ async function visOnNodeClick(clickedNode){
   //skip non course nodes for now...
   if(clickedNode.type != NODE_TYPES.COURSE.NAME) return;
 
-   //highlight the clicked node  FIXME
+   //highlight the clicked node
    var color = "red";
    if(currentNetworkType == modes.SUBJECT_AREA || currentNetworkType == modes.COURSE){
      color = NODE_TYPES.COURSE.SELECTED_COLOR;
@@ -370,10 +370,13 @@ async function visOnNodeClick(clickedNode){
          if(nodeToUpdate.isPrereq){
              color = NODE_TYPES.PREREQ.SELECTED_COLOR;
          }
+         else if(nodeToUpdate.type == NODE_TYPES.BRANCH.NAME){
+           color = NODE_TYPES.BRANCH.COLOR
+         }
      }
      if(currentNetworkType == modes.MAJOR){
        if(nodeToUpdate.isPrereq == true){
-          color =PREREQ_HIGHLIGHT_COLOR;
+          color = NODE_TYPES.PREREQ.HIGHLIGHT_COLOR;
        }
        else{
          color = majorOptions.getCourseHighlightColor(nodeToUpdate.name);

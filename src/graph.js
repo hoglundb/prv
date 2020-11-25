@@ -14,6 +14,8 @@ const NODE_TYPES = {
   BRANCH:{NAME:'branch', SIZE:7, HIGHLIGHT_SIZE:12, COLOR:"black", HIGHLIGHT_COLOR:"black", SELECTED_COLOR:"black"},
 }
 
+var nodeSizeInc = 0;
+
 const PREREQ_HIGHLIGHT_COLOR = "#DEDEDE"
 
 const SORT_METHOD = "directed";
@@ -122,6 +124,7 @@ function _addMajorOptionToTable(text1, text2, ovalColor){
 
 }
 
+
 function _addMajorOptionToHtmlTable(option, index){
    majorOptions.addOption(option);
    _addMajorOptionToTable(option.name + ":", "(Select " + option.numberRequired + " of these)",  majorOptions.getMajorOptionById(index).color)
@@ -217,7 +220,6 @@ function _addCourseToVisNetwork(course){
     color = majorOptions.getColorForCourse(course.name);
   }
   if(isCourseInNetwork(course.name)) {
-    console.log(course)
     return;
   }
   var node = {
@@ -226,7 +228,7 @@ function _addCourseToVisNetwork(course){
     name:course.name,
     label:course.name,
     description:course.description,
-    font:{size:NODE_TYPES.COURSE.SIZE},
+    font:{size:NODE_TYPES.COURSE.SIZE + nodeSizeInc},
     type:NODE_TYPES.COURSE.NAME,
     color:color,
     isHighlighted:false,
@@ -260,6 +262,7 @@ function _getVisOptions(){
  function buildVisNetwork(courses, _subjectArea){
    //reset the label area
  document.getElementById("majorOptionsSection").innerHTML = "";
+ zoomControler = new ZoomControler();
 
  if(currentNetworkType == modes.SUBJECT_AREA){
     _addMajorOptionToTable("Subject Area Courses", "", NODE_TYPES.COURSE.COLOR);
@@ -298,15 +301,73 @@ function getNetworkLayoutOptions(){
 }
 
 
+class ZoomControler{
+   constructor(){
+     this.zoomAmount = 0;
+     this.maxZoom = 4;
+     this.minZoom = -10;
+     this.nodeSizeInc = .3;
+     this.dir = 1;
+   }
+
+   visZoomEvent(e){
+       if(e.direction == "+"){
+         this.dir = 1;
+       }
+       else{
+         this.dir = -1;
+       }
+
+       this.zoomAmount += this.dir
+       if(this.zoomAmount > this.maxZoom && this.dir == 1){
+          visAdjustNodeSizes(this.dir * this.nodeSizeInc);
+       }
+       else if(this.zoomAmount >= this.maxZoom && this.dir == -1){
+          visAdjustNodeSizes(this.nodeSizeInc * this.dir);
+       }
+
+   }
+}
+
+
+//adjusts all the node sizes in the vis network by the specified size increment
+function visAdjustNodeSizes(increment){
+
+  if(visNetwork == null || visNodes == null){
+    console.error("vis network has not been initailized");
+  }
+
+  var nodes =  {data: visData.nodes._data};
+  var updateData = [];
+  for(var n in nodes.data){
+
+    var node = nodes.data[n]
+    if(node && node.font)
+   var updateJson = {id:node.id,font:{size:node.font.size - increment}}
+   updateData.push(updateJson);
+  }
+  visNodes.update(updateData)
+
+}
+
+
+var zoomControler = null;
+
  //add event listeners for clicking on nodes in the vis network
  function visAddEventListeners(){
+
+   visNetwork.on("zoom", async function(e){
+      zoomControler.visZoomEvent(e);
+   });
 
   //click event for nodes in the network. This highlights the node and it's prereqs
   visNetwork.on("click", async function(e){
 
     //unselect any nodes/edges
     await setVisToDefault();
-
+  //  visNetwork.moveTo({
+//       scale:2
+  //  });
     //ignore clicks not on nodes
    if(e == undefined || e.nodes == undefined || e.nodes[0] == undefined) {
      return;
@@ -355,7 +416,7 @@ async function visOnNodeClick(clickedNode){
    }
     visNodes.update({
      id:clickedNode.id,
-     font:{size:getNodeHighlightSizeFromType(clickedNode.type)},
+     font:{size:getNodeHighlightSizeFromType(clickedNode.type) + nodeSizeInc},
      isSelected:true,
      color:color,
     });
@@ -385,7 +446,7 @@ async function visOnNodeClick(clickedNode){
      var highlightSize = await getNodeHighlightSizeFromType(nodeToUpdate.type);
      visNodes.update({
         id:nodeToUpdate.id,
-        font:{size:highlightSize},
+        font:{size:highlightSize + nodeSizeInc},
         isHighlighted:true,
         color:color,
      });
@@ -408,14 +469,13 @@ async function visOnNodeDoubleClick(clickedNode){
   document.getElementById("networkTypeDropdown").value = "courseOption"
   document.getElementById("courseDropdownArea").style.display = "block";
   document.getElementById("majorOptionDropdownSection").style.display = "none"
-  console.log("dslfkjlkj")
   await generateNetwork();
 }
 
 
 //returns the highlight size for the node of the given type
 function getNodeHighlightSizeFromType(nodeType){
-  return  _getNodeTypeEnum(nodeType).HIGHLIGHT_SIZE;
+  return  _getNodeTypeEnum(nodeType).HIGHLIGHT_SIZE + nodeSizeInc;
 }
 
 
@@ -433,7 +493,7 @@ function getNodeColorFromType(nodeType){
 
 //returns the regular node size based on the node type
 function getNodeSizeFromType(nodeType){
-  return  _getNodeTypeEnum(nodeType).SIZE;
+  return  _getNodeTypeEnum(nodeType).SIZE + nodeSizeInc;
 }
 
 
@@ -514,7 +574,7 @@ function setVisToDefault(){
 
             visNodes.update({
                id:node.id,
-               font:{size:getNodeSizeFromType(node.type)},
+               font:{size:getNodeSizeFromType(node.type) + nodeSizeInc},
                isHighlighted:false,
                isSelected:false,
                color: color,
@@ -566,7 +626,7 @@ function setVisToDefault(){
                               name:courseToAdd.name,
                               label:courseToAdd.name,
                               description:courseToAdd.description,
-                              font:{size:NODE_TYPES.PREREQ.SIZE},
+                              font:{size:NODE_TYPES.PREREQ.SIZE + nodeSizeInc},
                               color:NODE_TYPES.PREREQ.COLOR,
                               type:NODE_TYPES.COURSE.NAME,
                               isHighlighted:false,
@@ -599,7 +659,7 @@ function setVisToDefault(){
                  id:newNodeName,
                  color:NODE_TYPES.BRANCH.COLOR,
                  type:NODE_TYPES.BRANCH.NAME,
-                 font:{size:NODE_TYPES.BRANCH.SIZE, color:NODE_TYPES.BRANCH.COLOR},
+                 font:{size:NODE_TYPES.BRANCH.SIZE + nodeSizeInc, color:NODE_TYPES.BRANCH.COLOR},
                  label:'00',
                  isHighlighted:false,
                  isSelected:false,

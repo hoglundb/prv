@@ -9,8 +9,8 @@ var branchNodeCount = 0;
 
 //a crap ton of constants for drawing the vis network
 const NODE_TYPES = {
-  COURSE:{NAME:'course', SIZE:18, HIGHLIGHT_SIZE:25, COLOR:"#80CDFF", HIGHLIGHT_COLOR:"#B4DFFC", SELECTED_COLOR:"#B4DFFC"},
-  PREREQ:{NAME:'prereq', SIZE:18, HIGHLIGHT_SIZE:25, COLOR:"#C4C4C4", HIGHLIGHT_COLOR:"#E4E4E4", SELECTED_COLOR:"#E4E4E4"},
+  COURSE:{NAME:'course', SIZE:18, HIGHLIGHT_SIZE:21, SELECTED_SIZE:26, COLOR:"#80CDFF", HIGHLIGHT_COLOR:"#B4DFFC", SELECTED_COLOR:"#B4DFFC"},
+  PREREQ:{NAME:'prereq', SIZE:18, HIGHLIGHT_SIZE:21, SELECTED_SIZE:26, COLOR:"#C4C4C4", HIGHLIGHT_COLOR:"#E4E4E4", SELECTED_COLOR:"#E4E4E4"},
   BRANCH:{NAME:'branch', SIZE:7, HIGHLIGHT_SIZE:12, COLOR:"black", HIGHLIGHT_COLOR:"black", SELECTED_COLOR:"black"},
 }
 
@@ -233,6 +233,7 @@ function _addCourseToVisNetwork(course){
     color:color,
     isHighlighted:false,
     isSelected:false,
+    chosen:false,
   }
   visNodes.add(node);
 }
@@ -280,6 +281,26 @@ function _getVisOptions(){
    buildVisSubjectAreaNetwork(courses, _subjectArea)
  }
 
+ var corusesList = getListOfCoursesInNetwork();
+ autocomplete(document.getElementById("courseSearchInput"), corusesList)
+
+}
+
+
+function getListOfCoursesInNetwork(){
+
+    var nodes =  {data: visData.nodes._data};
+    var courseNames = [];
+    for(var n in nodes.data){
+
+      var node = nodes.data[n]
+      if(node && node.font){
+        if(node.type != NODE_TYPES.BRANCH.NAME){
+          courseNames.push(node.name);
+        }
+      }
+    }
+    return courseNames
 }
 
 
@@ -365,10 +386,7 @@ var zoomControler = null;
 
     //unselect any nodes/edges
     await setVisToDefault();
-  //  visNetwork.moveTo({
-//       scale:2
-  //  });
-    //ignore clicks not on nodes
+
    if(e == undefined || e.nodes == undefined || e.nodes[0] == undefined) {
      return;
    }
@@ -416,7 +434,7 @@ async function visOnNodeClick(clickedNode){
    }
     visNodes.update({
      id:clickedNode.id,
-     font:{size:getNodeHighlightSizeFromType(clickedNode.type) + nodeSizeInc},
+     font:{size:getNodeSelectedSizeFromType(clickedNode.type) + nodeSizeInc},
      isSelected:true,
      color:color,
     });
@@ -476,6 +494,11 @@ async function visOnNodeDoubleClick(clickedNode){
 //returns the highlight size for the node of the given type
 function getNodeHighlightSizeFromType(nodeType){
   return  _getNodeTypeEnum(nodeType).HIGHLIGHT_SIZE + nodeSizeInc;
+}
+
+
+function getNodeSelectedSizeFromType(nodeType){
+  return _getNodeTypeEnum(nodeType).SELECTED_SIZE;
 }
 
 
@@ -632,6 +655,7 @@ function setVisToDefault(){
                               isHighlighted:false,
                               isSelected:false,
                               isPrereq:true,
+                              chosen:false,
                             }
                             visNodes.add(nodeToAdd);
 
@@ -663,6 +687,7 @@ function setVisToDefault(){
                  label:'00',
                  isHighlighted:false,
                  isSelected:false,
+                 chosen:false,
                }
 
               visNodes.add(newNode);
@@ -884,4 +909,119 @@ function getVisEdgeByIds(fromId, toId){
 //returns the post fix for a course. For example "CS 212" will return "212"
 function _getPostfix(courseName){
   return courseName.split(" ")[1];
+}
+
+
+//simulates a vis click event on the node when it is selected in the search. Also center the graph at that node
+async function courseSearchAction(val){
+  await setVisToDefault();
+  var clickedNode = await getVisNodeById(val)
+  visOnNodeClick(clickedNode);
+  var coords = visNetwork.getPositions()[clickedNode.name];
+  visNetwork.moveTo({
+  position: {x:coords.x, y:coords.y}
+  });
+
+  //update the node text font so it looks like it was clicked on
+  visData.nodes.update({id:clickedNode.id})
+
+}
+
+
+function autocomplete(inp, arr) {
+  /*the autocomplete function takes two arguments,
+  the text field element and an array of possible autocompleted values:*/
+  var currentFocus;
+  /*execute a function when someone writes in the text field:*/
+  inp.addEventListener("input", function(e) {
+      var a, b, i, val = this.value;
+      /*close any already open lists of autocompleted values*/
+      closeAllLists();
+      if (!val) { return false;}
+      currentFocus = -1;
+      /*create a DIV element that will contain the items (values):*/
+      a = document.createElement("DIV");
+      a.setAttribute("id", this.id + "autocomplete-list");
+      a.setAttribute("class", "autocomplete-items");
+      /*append the DIV element as a child of the autocomplete container:*/
+      this.parentNode.appendChild(a);
+      /*for each item in the array...*/
+      for (i = 0; i < arr.length; i++) {
+        /*check if the item starts with the same letters as the text field value:*/
+        if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
+          /*create a DIV element for each matching element:*/
+          b = document.createElement("DIV");
+          /*make the matching letters bold:*/
+          b.innerHTML = "<strong>" + arr[i].substr(0, val.length) + "</strong>";
+          b.innerHTML += arr[i].substr(val.length);
+          /*insert a input field that will hold the current array item's value:*/
+          b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
+          /*execute a function when someone clicks on the item value (DIV element):*/
+          b.addEventListener("click", function(e) {
+              /*insert the value for the autocomplete text field:*/
+              inp.value = this.getElementsByTagName("input")[0].value;
+              /*close the list of autocompleted values,
+              (or any other open lists of autocompleted values:*/
+              closeAllLists();
+              courseSearchAction(inp.value);
+          });
+          a.appendChild(b);
+        }
+      }
+  });
+  /*execute a function presses a key on the keyboard:*/
+  inp.addEventListener("keydown", function(e) {
+      var x = document.getElementById(this.id + "autocomplete-list");
+      if (x) x = x.getElementsByTagName("div");
+      if (e.keyCode == 40) {
+        /*If the arrow DOWN key is pressed,
+        increase the currentFocus variable:*/
+        currentFocus++;
+        /*and and make the current item more visible:*/
+        addActive(x);
+      } else if (e.keyCode == 38) { //up
+        /*If the arrow UP key is pressed,
+        decrease the currentFocus variable:*/
+        currentFocus--;
+        /*and and make the current item more visible:*/
+        addActive(x);
+      } else if (e.keyCode == 13) {
+        /*If the ENTER key is pressed, prevent the form from being submitted,*/
+        e.preventDefault();
+        if (currentFocus > -1) {
+          /*and simulate a click on the "active" item:*/
+          if (x) x[currentFocus].click();
+        }
+      }
+  });
+  function addActive(x) {
+    /*a function to classify an item as "active":*/
+    if (!x) return false;
+    /*start by removing the "active" class on all items:*/
+    removeActive(x);
+    if (currentFocus >= x.length) currentFocus = 0;
+    if (currentFocus < 0) currentFocus = (x.length - 1);
+    /*add class "autocomplete-active":*/
+    x[currentFocus].classList.add("autocomplete-active");
+  }
+  function removeActive(x) {
+    /*a function to remove the "active" class from all autocomplete items:*/
+    for (var i = 0; i < x.length; i++) {
+      x[i].classList.remove("autocomplete-active");
+    }
+  }
+  function closeAllLists(elmnt) {
+    /*close all autocomplete lists in the document,
+    except the one passed as an argument:*/
+    var x = document.getElementsByClassName("autocomplete-items");
+    for (var i = 0; i < x.length; i++) {
+      if (elmnt != x[i] && elmnt != inp) {
+        x[i].parentNode.removeChild(x[i]);
+      }
+    }
+  }
+  /*execute a function when someone clicks in the document:*/
+  document.addEventListener("click", function (e) {
+      closeAllLists(e.target);
+  });
 }

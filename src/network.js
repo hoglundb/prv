@@ -9,7 +9,7 @@ const LAYOUT_TYPES = {
 
 const modes = {
     SUBJECT_AREA: 'subjectArea',
-    MAJOR: 'major',
+    MAJOR: 'program',
     COURSE: 'course',
 }
 
@@ -44,7 +44,7 @@ function tmpDisableDropdownOptions(){
 
   $("#networkTypeDropdown option").each(function()
   {
-    if($(this).text() == "Major"){
+    if($(this).text() == "Program"){
       //  $(this).prop("disabled", true)
       //    $(this).css("background", "lightGrey")
     }
@@ -81,7 +81,7 @@ async function addEventListeners(){
                generateNetwork()
           }
 
-          else if(e.target.value == "majorOption"){
+          else if(e.target.value == "programOption"){
             await buildMajorOptionDropdown();
             currentNetworkType = modes.MAJOR;
             document.getElementById("courseDropdownArea").style.display = "none";

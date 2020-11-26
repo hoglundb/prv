@@ -2,6 +2,7 @@
 
 const LAYOUT_TYPES = {
    COURSE_PROGRESSION:"course progression",
+   COURSE_PROGRESSION2:"course progression2",
    HIERARCHICAL:"hierarchical",
    KAMADA_KAWAI: "kamada kawai",
 }
@@ -60,14 +61,52 @@ function buildLegend(){
 
 }
 
+
+function checkboxClick(e){
+   var checkBoxes = document.getElementsByClassName("myCheck");
+   var text = "";
+   var count = 0;
+   var num = 0;
+   for(var i in checkBoxes){
+     count++;
+     if(count > 5) break;
+     if( document.getElementById("myCheck" + count.toString()).checked ){
+       var val = document.getElementById("myCheckText" + count.toString()).innerText
+       var b = checkBoxes[i];
+       text += val + "; "
+       num++;
+     }
+
+   }
+   if(num > 0){
+     text = text.slice(0, -2);
+   }
+   else if (num == 0){
+     text = "--None Selected--"
+   }
+   if(num >= 5) text = "All"
+   document.getElementById("defaultCourseLevelOption").innerText = text
+}
+
+
 //add event listeners for dropdown changes and stuff
 async function addEventListeners(){
 
+  //clicking anywhere will close the custom checkbox
+  document.addEventListener("click", function(e){
+      if(e.target.className != "myLabel" && e.target.id != "checkArea1" && e.target.id != "checkboxes" && e.target.id != "checkboxesSection1" && e.target.className != "myCheck"){
+
+        if(expanded){
+          showCheckboxes();
+        }
+      }
+
+  });
 
   document.getElementById("searchButton").addEventListener("click", async function(e){
       var val = document.getElementById("courseSearchInput").value;
       courseSearchAction(val);
-  })
+  });
 
   document.getElementById("courseSearchInput").addEventListener("keyup", async function(e){
      if(e.keyCode == 13){
@@ -75,7 +114,7 @@ async function addEventListeners(){
        courseSearchAction(val);
      }
 
-  })
+  });
 
   //event listener for the subjectAreaDropdown
   document.getElementById("networkTypeDropdown").addEventListener("change",  async function(e){
@@ -131,6 +170,9 @@ async function addEventListeners(){
       var selectedLayout = $("#layoutDropdown").find(":selected").val();
       if(selectedLayout == LAYOUT_TYPES.COURSE_PROGRESSION){
         currentNetworkLayout = LAYOUT_TYPES.COURSE_PROGRESSION;
+      }
+      else if(selectedLayout == LAYOUT_TYPES.COURSE_PROGRESSION2){
+        currentNetworkLayout = LAYOUT_TYPES.COURSE_PROGRESSION2;
       }
       else if(selectedLayout == LAYOUT_TYPES.HIERARCHICAL){
         currentNetworkLayout = LAYOUT_TYPES.HIERARCHICAL;
@@ -307,4 +349,18 @@ function getNetworkForCourseAjax(_subjectArea, _courseName){
 
 
   return $.get("networkForCourse" + "?subjectArea=" + _subjectArea + "&course=" + _courseName);
+}
+
+
+var expanded = false;
+
+function showCheckboxes() {
+  var checkboxes = document.getElementById("checkboxes");
+  if (!expanded) {
+    checkboxes.style.display = "block";
+    expanded = true;
+  } else {
+    checkboxes.style.display = "none";
+    expanded = false;
+  }
 }

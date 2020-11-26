@@ -24,7 +24,7 @@ const TREE_SPACING = 100;
 const LEVEL_SEPARATION = 100;
 
 const EDGE_COLOR = "grey";
-const EDGE_WIDTH = .2;
+const EDGE_WIDTH = 1.2;
 
 const EDGE_HIGHLIGHTED_COLOR = "#F94CFF";
 const EDGE_HIGHLIGHTED_WIDTH = 4
@@ -204,9 +204,6 @@ function buildVisSubjectAreaNetwork(courses, _subjectArea){
 
 //adds connected prereq nodes and their connections to the network being built
 function _addVisChildNodes(course,_subjectArea){
-         if(course.name == 'MTH 452' || course.name == "MTH 351"){
-           console.log(course);
-         }
         var prereqRoot = course.root.connections;
          recurseNode(course.root, course.name, _subjectArea);
          prereqRoot.forEach(function(endPoint){
@@ -751,12 +748,16 @@ function computeLayout(){
   }
 
   if(currentNetworkLayout == LAYOUT_TYPES.COURSE_PROGRESSION){
+
     computeCourseProgessionLayout();
+  }
+  else if(currentNetworkLayout == LAYOUT_TYPES.COURSE_PROGRESSION2){
+    computeCourseProgression2Layout();
   }
   else if(currentNetworkLayout == LAYOUT_TYPES.HIERARCHICAL){
     computeHierarchicalLayout();
   }
-
+  console.log(currentNetworkLayout)
 }
 
 
@@ -771,6 +772,68 @@ function computeHierarchicalLayout(){
         visNodes.update({id:n.id, x:0,y:0});
       }
     }
+}
+
+
+//compute an alternate course progression layout for testing
+function computeCourseProgression2Layout(){
+     var curX = 0;
+     var curY = 0;
+     var xInc =250;
+     var yInc = 100;
+     var ySpacing = 100;
+     let nodesDataset = visData.nodes._data;
+     var nodes = [];
+     for(var i in nodesDataset){
+       var n = nodesDataset[i];
+       if(n.type == NODE_TYPES.COURSE.NAME){
+          n.level = Math.ceil(_getPostfix(n.id) / 100) * 100 - 100;
+          nodes.push(n);
+       }
+     }
+
+     nodes.sort(function(a, b) {
+       var textA = _getPostfix(a.id);
+       var textB = _getPostfix(b.id);
+       return (textA > textB) ? -1 : (textA < textB) ? 1 : 0;
+     }).reverse();
+
+     var curLevel = 0;
+     nodes.forEach(function(n){
+         if(n.level > curLevel){
+           curX += xInc;
+           curY = 0;
+         }
+         n.x = curX;
+         n.y = curY;
+           curLevel = n.level;
+           curY += yInc;
+     });
+
+     //position the branch nodes based on their connections
+     var brachNodes = [];
+     for(var key in nodesDataset){
+         var n = nodesDataset[key];
+         if(n.type != NODE_TYPES.COURSE.NAME){
+           var connections = getConnectedCourseNodes(n.id, NODE_TYPES.COURSE.NAME);
+           var xPos = -10;
+           var yPos = 75;
+           for(var key in connections){
+               var con = connections[key];
+               xPos += 10;
+               yPos += 50;
+           }
+           var fromNode = getCourseNodePointingToBranchNode(n.id);
+           n.x = fromNode.x - .5 * xInc - xPos
+           n.y = fromNode.y - yPos
+         }
+       }
+}
+
+
+//returns an array of the logic branch nodes that are associated with the specified node
+function _getBranchNodesForCourseNode(nodeId){
+
 }
 
 

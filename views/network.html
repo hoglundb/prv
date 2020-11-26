@@ -124,6 +124,44 @@ position:absolute;
     background-color: DodgerBlue !important;
     color: #ffffff;
   }
+
+
+
+
+
+  .multiselect {
+  width: 200px;
+}
+
+.selectBox {
+  position: relative;
+}
+
+.selectBox select {
+  width: 100%;
+  font-weight: bold;
+}
+
+.overSelect {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
+
+#checkboxes {
+  display: none;
+  border: 1px #dadada solid;
+}
+
+#checkboxes label {
+  display: block;
+}
+
+#checkboxes label:hover {
+  background-color: #1e90ff;
+}
   </style>
   <script>
   </script>
@@ -164,8 +202,32 @@ position:absolute;
 <select class="form-control" id="layoutDropdown" style="width:95%;font-size:16px">
   <option selected value='hierarchical'>Hierarchical</option>
  <option value='course progression'>Course Progression</option>
+ <option value='course progression2'>Course Progression2</option>
  <option  value="kamada kawai">Kamada Kawai</option>
  </select>
+</div>
+
+<div id="checkArea3" class="multiselect form-group" style=" margin-top:30px; margin-left:4%; font-size:12pt">
+  <div class="selectBox"  onclick="showCheckboxes()" id="checkArea2">
+    <label  style="font-size:18px">Course Division</label>
+
+    <select id= "courseLevelDropdown" class="form-control" style="background:white;">
+      <option id="defaultCourseLevelOption">All</option>
+    </select>
+    <div class="overSelect" class="courseLevelSelectionContainer" id="checkArea1"></div>
+  </div>
+  <div id="checkboxes"  class="courseLevelSelectionContainer" style="background:white;">
+    <label for="zeroLevel" class="myLabel">
+      <input class="myCheck" checked="checked" style="margin-left:8px" type="checkbox" id="myCheck1" onclick = "checkboxClick()" /> <span id="myCheckText1">000<span> </label>
+    <label for="oneHundredLevel"  class="myLabel">
+      <input class="myCheck" checked="checked" style="margin-left:8px" type="checkbox" id="myCheck2"  onclick = "checkboxClick()" />  <span id="myCheckText2">100<span>  </label>
+    <label for="twoHundredLevel"  class="myLabel">
+      <input class="myCheck" checked="checked" style="margin-left:8px" type="checkbox" id="myCheck3"  onclick = "checkboxClick()" /> <span id="myCheckText3">200<span>  </label>
+      <label for="threeHundredLevel"  class="myLabel">
+        <input class="myCheck" checked="checked" style="margin-left:8px" type="checkbox" id="myCheck4"  onclick = "checkboxClick()" />  <span id="myCheckText4">300<span>  </label>
+        <label for="fourHundredLevel"  class="myLabel">
+        <input class="myCheck" checked="checked" style="margin-left:8px" type="checkbox" id="myCheck5"  onclick = "checkboxClick()" /> <span id="myCheckText5">400<span> </label>
+  </div>
 </div>
 
 

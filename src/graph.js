@@ -186,7 +186,7 @@ function buildVisSubjectAreaNetwork(courses, _subjectArea){
   });
 
    courses.courses.forEach( function(course){
-    _addVisChildNodes(course, _subjectArea)
+     _addVisChildNodes(course, _subjectArea)
   });
 
   visData = {nodes:visNodes, edges:visEdges}
@@ -204,7 +204,9 @@ function buildVisSubjectAreaNetwork(courses, _subjectArea){
 
 //adds connected prereq nodes and their connections to the network being built
 function _addVisChildNodes(course,_subjectArea){
-
+         if(course.name == 'MTH 452' || course.name == "MTH 351"){
+           console.log(course);
+         }
         var prereqRoot = course.root.connections;
          recurseNode(course.root, course.name, _subjectArea);
          prereqRoot.forEach(function(endPoint){

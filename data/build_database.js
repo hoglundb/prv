@@ -628,15 +628,44 @@ function SpecialCase2(courseName, courseTitle, courseDescription, a, b, c, d, e,
   fromRoot.addConnection(new Imports.Connection(orSet1, false));
   fromRoot.addConnection(new Imports.Connection(orSet2, false));*/
 
-  rootNode.root.addConnection(aNode, false);
-  rootNode.root.addConnection(orSet1, false);
-  rootNode.root.addConnection(orset2, false);
+  rootNode.root.addConnection(new Imports.Connection(aNode, false));
+  rootNode.root.addConnection(new Imports.Connection(orSet1, false));
+  rootNode.root.addConnection(new Imports.Connection(orSet2, false));
 //  rootNode.root.addConnection(new Imports.Connection(fromRoot, false));
   mathSubjectArea.addCourseWithPrereqs(rootNode);
   courses.push(rootNode)
 
 }
 
+function CreateGenericCourse(prereqsList, courseName, courseTitle, courseDescription){
+
+  //the root node of the course prereq heirarchy that this course
+  var rootNode = new Imports.Course(courseName, courseTitle, courseDescription, currentSubjectArea)
+
+   for(var key in prereqsList){
+
+     //split appart any optional prereqs into an array
+     var p  = prereqsList[key].split(',');
+
+     //if we have a set of optional prereqs (only one of which is required)
+     if(p.length > 1){
+           for(var k in p){
+             var connectedNode = new Imports.Node(p[k]);
+             var connection = new Imports.Connection(connectedNode, true)
+             rootNode.root.addConnection(connection);
+           }
+     }
+
+     //if we this is just a single required prereq
+     else if(p.length == 1){
+       var connectedNode = new Imports.Node(p[0]);
+       var connection = new Imports.Connection(connectedNode, false)
+       rootNode.root.addConnection(connection);
+     }
+   }
+   courses.push(rootNode);
+   return rootNode;
+}
 
 //handles the relationship (a or b or (c & d))
 function SpecialCase1(courseName, courseTitle, courseDescription, a, b, c, d){

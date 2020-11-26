@@ -63,6 +63,20 @@ function buildLegend(){
 //add event listeners for dropdown changes and stuff
 async function addEventListeners(){
 
+
+  document.getElementById("searchButton").addEventListener("click", async function(e){
+      var val = document.getElementById("courseSearchInput").value;
+      courseSearchAction(val);
+  })
+
+  document.getElementById("courseSearchInput").addEventListener("keyup", async function(e){
+     if(e.keyCode == 13){
+       var val = document.getElementById("courseSearchInput").value;
+       courseSearchAction(val);
+     }
+
+  })
+
   //event listener for the subjectAreaDropdown
   document.getElementById("networkTypeDropdown").addEventListener("change",  async function(e){
 

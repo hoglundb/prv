@@ -914,8 +914,15 @@ function _getPostfix(courseName){
 
 //simulates a vis click event on the node when it is selected in the search. Also center the graph at that node
 async function courseSearchAction(val){
+
+  if(visNetwork == null) return;
+
   await setVisToDefault();
   var clickedNode = await getVisNodeById(val)
+  if(!clickedNode) {
+    alert("Course not found!");
+    return;
+  }
   visOnNodeClick(clickedNode);
   var coords = visNetwork.getPositions()[clickedNode.name];
   visNetwork.moveTo({

@@ -157,7 +157,7 @@ function buildVisMajorOptionNetwork(data, _subjectArea){
       //add prereq courses and edges
       for(var d in data){
          for(var c in data[d].courses){
-           _addVisChildNodes(data[d].courses[c], _subjectArea);
+           _addVisChildNodes(data[d].courses[c], _subjectArea, 1);
          }
       }
 
@@ -177,7 +177,7 @@ function buildVisMajorOptionNetwork(data, _subjectArea){
 
 
 //builds the vis network for the subjectArea netowrk type
-function buildVisSubjectAreaNetwork(courses, _subjectArea){
+function buildVisSubjectAreaNetwork(courses, _subjectArea, depth){
   visNodes = new vis.DataSet();
   visEdges = new vis.DataSet();
 
@@ -186,8 +186,11 @@ function buildVisSubjectAreaNetwork(courses, _subjectArea){
   });
 
    courses.courses.forEach( function(course){
-     _addVisChildNodes(course, _subjectArea)
+     _addVisChildNodes(course, _subjectArea, depth)
   });
+
+
+
 
   visData = {nodes:visNodes, edges:visEdges}
 
@@ -258,16 +261,48 @@ function _getVisOptions(){
 }
 
 
+//filters out course levels that are not selected in the CourseDivision dropdown
+function filterByDivision(courses){
+     var coursesFiltered = [];
+     for(var i in courses.courses){
+       var course = courses.courses[i];
+       var level =  getCourseLevelFromName(course.name);
+       if(isShowingCourseLevel(level)){
+         coursesFiltered.push(course)
+       }
+     }
+     courses.courses = coursesFiltered;
+     return courses;
+}
+
+
+//returns true if that course level is checked in the dropdown
+function isShowingCourseLevel(level){
+     var index = (level / 100) + 1;
+     if(document.getElementById("myCheck" + index.toString()).checked){
+       return true;
+     }
+     return false;
+}
+
+
+//returns the course level from the course name. (e.g. MTH 111 returns 100 since it is a 100 level course)
+function getCourseLevelFromName(courseId){
+   return Math.ceil(_getPostfix(courseId) / 100) * 100 - 100;
+}
+
 //Called from network.js to build the visNetwork. Builds either the Major Options network or the SubjectArea network
  function buildVisNetwork(courses, _subjectArea){
+
+  courses = filterByDivision(courses);
+
    //reset the label area
  document.getElementById("majorOptionsSection").innerHTML = "";
  zoomControler = new ZoomControler();
-
  if(currentNetworkType == modes.SUBJECT_AREA){
     _addMajorOptionToTable("Subject Area Courses", "", NODE_TYPES.COURSE.COLOR);
     _addMajorOptionToTable("Non-Subject Area Courses ", "", NODE_TYPES.PREREQ.COLOR);
-    buildVisSubjectAreaNetwork(courses, _subjectArea);
+    buildVisSubjectAreaNetwork(courses, _subjectArea, 1);
  }
 
  else if(currentNetworkType == modes.MAJOR){
@@ -277,7 +312,7 @@ function _getVisOptions(){
  else if(currentNetworkType == modes.COURSE){
    _addMajorOptionToTable("Searched Course", "", NODE_TYPES.COURSE.COLOR);
    _addMajorOptionToTable("Course Prereqs", "", NODE_TYPES.PREREQ.COLOR);
-   buildVisSubjectAreaNetwork(courses, _subjectArea)
+    buildVisSubjectAreaNetwork(courses, _subjectArea,  $("#courseDepthDropdown").find(":selected").val())
  }
 
  var corusesList = getListOfCoursesInNetwork();

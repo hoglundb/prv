@@ -86,6 +86,9 @@ function checkboxClick(e){
    }
    if(num >= 5) text = "All"
    document.getElementById("defaultCourseLevelOption").innerText = text
+
+   //rebuild the network based on the new selection
+   generateNetwork();
 }
 
 
@@ -123,6 +126,7 @@ async function addEventListeners(){
            if(e.target.value == "courseOption"){
              ref.style.display = "none";
              document.getElementById("courseDropdownArea").style.display = "block";
+             document.getElementById("courseDepthDropdownArea").style.display = "block"
              await buildCoursesDropdown();
              currentNetworkType =  modes.COURSE;
              generateNetwork();
@@ -130,6 +134,7 @@ async function addEventListeners(){
           else if(e.target.value == "subjectAreaOption"){
              currentNetworkType = modes.SUBJECT_AREA
              document.getElementById("courseDropdownArea").style.display = "none";
+             document.getElementById("courseDepthDropdownArea").style.display = "none"
              ref.style.display = "none";
                generateNetwork()
           }
@@ -138,6 +143,7 @@ async function addEventListeners(){
             await buildMajorOptionDropdown();
             currentNetworkType = modes.MAJOR;
             document.getElementById("courseDropdownArea").style.display = "none";
+            document.getElementById("courseDepthDropdownArea").style.display = "none"
             ref.style.display = "block"
             generateNetwork()
           }

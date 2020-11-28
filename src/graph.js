@@ -635,6 +635,7 @@ async function visOnNodeDoubleClick(clickedNode){
   $("#courseSelectionDropdown").val(clickedNode.id);
   document.getElementById("networkTypeDropdown").value = "courseOption"
   document.getElementById("courseDropdownArea").style.display = "block";
+  document.getElementById("courseDepthDropdownArea").style.display = "block"
   document.getElementById("majorOptionDropdownSection").style.display = "none"
   await generateNetwork();
 }

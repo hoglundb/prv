@@ -676,26 +676,16 @@ function SpecialCase1(courseName, courseTitle, courseDescription, a, b, c, d){
     var cNode = new Imports.Node(c);
     var dNode = new Imports.Node(d);
 
-    var dcBranchNode = new Imports.Node();
-    var toD = new Imports.Connection(dNode, false);
-    var toC = new Imports.Connection(cNode, false);
-    dcBranchNode.addConnection(toD);
-    dcBranchNode.addConnection(toC);
+    var branchNode = new Imports.Node();
+    branchNode.addConnection(new Imports.Connection(cNode, false));
+    branchNode.addConnection(new Imports.Connection(dNode, false));
 
-    var orBranchNode = new Imports.Node();
-    var toA = new Imports.Connection(aNode, true);
-    var toB = new Imports.Connection(bNode, true);
-    orBranchNode.addConnection(toA)
-    orBranchNode.addConnection(toB);
 
-    var toDC = new Imports.Connection(dcBranchNode, true);
-    orBranchNode.addConnection(toDC);
+    rootNode.root.addConnection(new Imports.Connection(aNode, true));
+    rootNode.root.addConnection(new Imports.Connection(bNode, true));
+    rootNode.root.addConnection(new Imports.Connection(branchNode, true));
 
-    var fromRootNode = new Imports.Node();
-    var fromRootConnection = new Imports.Connection(orBranchNode, false);
-    fromRootNode.addConnection(fromRootConnection);
-    rootNode.root.addConnection(fromRootConnection);
-    mathSubjectArea.addCourseWithPrereqs(rootNode);
+
     courses.push(rootNode);
 }
 

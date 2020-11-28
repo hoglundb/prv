@@ -6,6 +6,8 @@ let visNetwork = null;
 let container = null;
 let options = null;
 var branchNodeCount = 0;
+var zoomControler = null;
+var majorOptions = null;
 
 //a crap ton of constants for drawing the vis network
 const NODE_TYPES = {
@@ -85,6 +87,7 @@ class MajorOptions{
 
 }
 
+
 class MajorOption{
    constructor(_name, _numberRequired, _color, _id, _courses){
      this.id = _id;
@@ -94,9 +97,6 @@ class MajorOption{
      this.courses = _courses
    }
 }
-var majorOptions = null;
-
-
 
 
 function _addMajorOptionToTable(text1, text2, ovalColor){
@@ -150,7 +150,7 @@ function buildVisMajorOptionNetwork(data, _subjectArea){
       //add the corses for each category
       for(var d in data){
          for(var c in data[d].courses){
-           _addCourseToVisNetwork(data[d].courses[c]);
+           _addCourseToVisNetwork(data[d].courses[c], 0);
          }
       }
 
@@ -175,20 +175,99 @@ function buildVisMajorOptionNetwork(data, _subjectArea){
 
 }
 
+class MyDataset{
+   constructor(){
+     this.nodes = [];
+     this.edges = [];
+   }
+}
 
-//builds the vis network for the subjectArea netowrk type
-function buildVisSubjectAreaNetwork(courses, _subjectArea, depth){
+
+ function doIt(_myDataset, _subjectArea, _d){
+
+  for(var i in _myDataset.nodes){
+
+/*    console.log(_myDataset.nodes[i].type)
+    console.log(_myDataset.nodes[i].depth)
+    console.log(_d);
+    console.log(NODE_TYPES.BRANCH.NAME);
+    console.log("")*/
+    if( _myDataset.nodes[i].type != NODE_TYPES.BRANCH.NAME && _myDataset.nodes[i].depth == _d){
+
+         var courseAtDepth = JSON.parse(getCourseDataAjax(_subjectArea, _myDataset.nodes[i].id).responseText);
+      //var courseAtDepth =  getCourseDataAjax(_subjectArea, _myDataset.nodes[i].id);
+      for(var c in courseAtDepth.courses){
+        _myDataset = _addVisChildNodes2(courseAtDepth.courses[c], _subjectArea, _d + 1, _myDataset);
+      }
+    }
+  }
+
+  return _myDataset;
+}
+
+async function buildVisCourseNetwork(_course, _subjectArea, _depth){
   visNodes = new vis.DataSet();
   visEdges = new vis.DataSet();
 
-  courses.courses.forEach(function(course){
-       _addCourseToVisNetwork(course);
+   var myDataset = new MyDataset();
+
+   for(var c in _course.courses){
+     myDataset = _addCourseToVisNetwork2( _course.courses[c], 0, myDataset);
+   }
+
+   for(var c in _course.courses){
+     myDataset = _addVisChildNodes2(_course.courses[c], _subjectArea, 1, myDataset)
+   }
+
+  let  d = parseInt($("#courseDepthDropdown").find(":selected").val())
+
+     for(var i = 1; i < _depth; i++){
+       myDataset = await doIt(myDataset, _subjectArea, i)
+     }
+
+   visNodes.add(myDataset.nodes)
+   visEdges.add(myDataset.edges)
+   var myVisData = {nodes:visNodes, edges:visEdges}
+   visData = myVisData;
+
+   computeLayout();
+
+   visNetwork = new vis.Network(document.getElementById("myNetwork"), visData, _getVisOptions());
+   buildLegend();
+   //add event listenders for the vis network
+    visAddEventListeners();
+
+}
+
+//builds the vis network for the subjectArea netowrk type
+async function buildVisSubjectAreaNetwork(courses, _subjectArea, depth){
+  visNodes = new vis.DataSet();
+  visEdges = new vis.DataSet();
+
+  courses.courses.forEach(async function(course){
+    await  _addCourseToVisNetwork(course, 0);
   });
 
-   courses.courses.forEach( function(course){
-     _addVisChildNodes(course, _subjectArea, depth)
+   courses.courses.forEach( async function(course){
+    await  _addVisChildNodes(course, _subjectArea, 1)
   });
 
+
+  //if we are in single node mode, add connections out to the specified depth
+
+/*    visNodes.forEach(async function(n){ ///FIXME
+
+      if(n.type != NODE_TYPES.BRANCH.NAME && n.depth == i){
+            var courseAtDepth =  await getCourseDataAjax(_subjectArea, n.id);
+            for(var c in courseAtDepth.courses){
+              var course = courseAtDepth.courses[c];
+
+              await _addVisChildNodes(course, _subjectArea, i + 1);
+            }
+      }
+
+    });
+*/
 
 
 
@@ -206,17 +285,24 @@ function buildVisSubjectAreaNetwork(courses, _subjectArea, depth){
 
 
 //adds connected prereq nodes and their connections to the network being built
-function _addVisChildNodes(course,_subjectArea){
+function _addVisChildNodes(course,_subjectArea, _depth){
         var prereqRoot = course.root.connections;
-         recurseNode(course.root, course.name, _subjectArea);
-         prereqRoot.forEach(function(endPoint){
-        var endpointNode = endPoint.endpointNode;
-        });
+         recurseNode(course.root, course.name, _subjectArea, _depth);
+         //prereqRoot.forEach(function(endPoint){
+    //    var endpointNode = endPoint.endpointNode;
+      //  });
+}
+
+
+function _addVisChildNodes2(_course, _subjectArea, _depth, _myDataset){
+   var prereqRoot = _course.root.connections;
+   _myDataset = recurseNode2(_course.root, _course.name, _subjectArea, _depth, _myDataset);
+   return _myDataset
 }
 
 
 //adds a course node to the vis network that is being built
-function _addCourseToVisNetwork(course){
+function _addCourseToVisNetwork(course, _depth){
   var color = NODE_TYPES.COURSE.COLOR;
   if(currentNetworkType == modes.MAJOR){
     color = majorOptions.getColorForCourse(course.name);
@@ -236,8 +322,37 @@ function _addCourseToVisNetwork(course){
     isHighlighted:false,
     isSelected:false,
     chosen:false,
+    depth:_depth,
   }
   visNodes.add(node);
+}
+
+
+//TMP adds a course node to the vis network that is being built
+function _addCourseToVisNetwork2(_course, _depth, _myDataset){
+  var color = NODE_TYPES.COURSE.COLOR;
+  if(currentNetworkType == modes.MAJOR){
+    color = majorOptions.getColorForCourse(_course.name);
+  }
+  if(isCourseInNetwork2(_course.name, _myDataset.nodes)) {
+    return;
+  }
+  var node = {
+    id:_course.name,
+    title:_course.title,
+    name:_course.name,
+    label:_course.name,
+    description:_course.description,
+    font:{size:NODE_TYPES.COURSE.SIZE + nodeSizeInc},
+    type:NODE_TYPES.COURSE.NAME,
+    color:_course,
+    isHighlighted:false,
+    isSelected:false,
+    chosen:false,
+    depth:parseInt(_depth),
+  }
+  _myDataset.nodes.push(node);
+  return _myDataset;
 }
 
 
@@ -291,6 +406,7 @@ function getCourseLevelFromName(courseId){
    return Math.ceil(_getPostfix(courseId) / 100) * 100 - 100;
 }
 
+
 //Called from network.js to build the visNetwork. Builds either the Major Options network or the SubjectArea network
  function buildVisNetwork(courses, _subjectArea){
 
@@ -312,11 +428,12 @@ function getCourseLevelFromName(courseId){
  else if(currentNetworkType == modes.COURSE){
    _addMajorOptionToTable("Searched Course", "", NODE_TYPES.COURSE.COLOR);
    _addMajorOptionToTable("Course Prereqs", "", NODE_TYPES.PREREQ.COLOR);
-    buildVisSubjectAreaNetwork(courses, _subjectArea,  $("#courseDepthDropdown").find(":selected").val())
+   var depth =  $("#courseDepthDropdown").find(":selected").val();
+    buildVisCourseNetwork(courses, _subjectArea, depth)
  }
 
- var corusesList = getListOfCoursesInNetwork();
- autocomplete(document.getElementById("courseSearchInput"), corusesList)
+ var coursesList = getListOfCoursesInNetwork();
+ autocomplete(document.getElementById("courseSearchInput"), coursesList)
 
 }
 
@@ -405,8 +522,6 @@ function visAdjustNodeSizes(increment){
 
 }
 
-
-var zoomControler = null;
 
  //add event listeners for clicking on nodes in the vis network
  function visAddEventListeners(){
@@ -652,8 +767,107 @@ function setVisToDefault(){
 }
 
 
+function recurseNode2(_node, _name, _subjectArea, _depth, _myDataset){
+     if(!_node.hasChildren) return _myDataset;
+
+     var newNodeName = "prev_" + _name;
+     var connectionIndex = 0;
+
+     for(var i in _node.connections){
+       var connection = _node.connections[i];
+       newNodeName += "_" + connectionIndex++
+
+       //if node is a course node, create and add it here
+       if(connection.endpointNode.hasCourse){
+         var courseToAdd = null;
+         if(true){
+           var courseData =  JSON.parse(getCourseDataAjax(_subjectArea, connection.endpointNode.course).responseText);
+           if(courseData.courses.length == 0) return  console.error("Error: course '" + connection.endpointNode.course + "' not in the database");
+             courseToAdd = courseData.courses[0];
+
+             //only add the course if not already in the vis network
+             if(!isCourseInNetwork2(courseToAdd.name, _myDataset.nodes)) {
+               var nodeToAdd = {
+                 id:courseToAdd.name,
+                 title:courseToAdd.title,
+                 name:courseToAdd.name,
+                 label:courseToAdd.name,
+                 description:courseToAdd.description,
+                 font:{size:NODE_TYPES.PREREQ.SIZE + nodeSizeInc},
+                 color:NODE_TYPES.PREREQ.COLOR,
+                 type:NODE_TYPES.COURSE.NAME,
+                 isHighlighted:false,
+                 isSelected:false,
+                 isPrereq:true,
+                 chosen:false,
+                 depth:parseInt(_depth),
+               }
+               _myDataset.nodes.push(nodeToAdd);
+             }
+
+             //add the edge to the prereq node
+             let newEdge = {
+                from: _name,
+                to: connection.endpointNode.course,
+                dashes:connection.isDashed,
+                chosen:false, //want to control what happens to edges when a node is selected
+                width:EDGE_WIDTH,
+                color: {
+                  color: EDGE_COLOR,
+                },
+                isHighlighted:false,
+             }
+
+            _myDataset.edges.push(newEdge);
+         }
+       }
+
+       //if node is a logic branch node, create and add it here
+       else{
+         //add the branch node
+        if(!isCourseInNetwork2(newNodeName, _myDataset.nodes)) {
+         var newNode = {
+           id:newNodeName,
+           color:NODE_TYPES.BRANCH.COLOR,
+           type:NODE_TYPES.BRANCH.NAME,
+           font:{size:NODE_TYPES.BRANCH.SIZE + nodeSizeInc, color:NODE_TYPES.BRANCH.COLOR},
+           label:'00',
+           isHighlighted:false,
+           isSelected:false,
+           chosen:false,
+           depth:0,
+         }
+
+        _myDataset.nodes.push(newNode);
+      }
+
+      //add the connection to the logic branch node
+      let edge = {
+        from:_name,
+        to:newNodeName,
+        dashes:connection.isDashed,
+        chosen:false,
+        width:1,
+        isHighlighted:false,
+        color: {
+          color: EDGE_COLOR,
+        },
+        depth:null,
+      }
+      _myDataset.edges.push(edge);
+      if(connection.endpointNode.hasChildren){
+
+       _myDataset = recurseNode2(connection.endpointNode, newNodeName, _subjectArea, _depth, _myDataset);
+      }
+       }
+      branchNodeCount++
+     }
+
+     return _myDataset
+}
+
 //recurses throught the network data structure to build the vis network
- function recurseNode(node, name, _subjectArea){
+function recurseNode(node, name, _subjectArea, _depth){
 
     var newNodeName = "prev_" + name;
     if(node.hasChildren){
@@ -677,6 +891,9 @@ function setVisToDefault(){
                         }
                         else{
                           courseToAdd = courseData.courses[0];
+
+                          //only add the course if not already in the vis network
+                          if(!isCourseInNetwork(courseToAdd.name)) {
                             var nodeToAdd = {
                               id:courseToAdd.name,
                               title:courseToAdd.title,
@@ -690,8 +907,11 @@ function setVisToDefault(){
                               isSelected:false,
                               isPrereq:true,
                               chosen:false,
+                              depth:_depth,
                             }
                             visNodes.add(nodeToAdd);
+                          }
+
 
                         }
                   }
@@ -713,6 +933,7 @@ function setVisToDefault(){
              else{
 
                //add the branch node
+              if(!isCourseInNetwork(newNodeName)) {
                var newNode = {
                  id:newNodeName,
                  color:NODE_TYPES.BRANCH.COLOR,
@@ -725,6 +946,7 @@ function setVisToDefault(){
                }
 
               visNodes.add(newNode);
+            }
                //add the edge to the branch node
               let edge = {
                 from:name,
@@ -736,11 +958,12 @@ function setVisToDefault(){
                 color: {
                   color: EDGE_COLOR,
                 },
+                depth:null,
               }
              visEdges.add(edge)
                if(connection.endpointNode.hasChildren){
 
-                 recurseNode(connection.endpointNode, newNodeName, _subjectArea);
+                 recurseNode(connection.endpointNode, newNodeName, _subjectArea, _depth);
                }
              }
                branchNodeCount++
@@ -761,6 +984,17 @@ function isCourseInNetwork(courseId){
 
   });
   return result;
+}
+
+
+//tmp returns true if the specified course is in the vis network
+function isCourseInNetwork2(courseId, _nodesToAdd){
+  for(var i in _nodesToAdd){
+    if(_nodesToAdd[i].id == courseId){
+      return true;
+    }
+  }
+  return false;
 }
 
 
@@ -792,7 +1026,6 @@ function computeLayout(){
   else if(currentNetworkLayout == LAYOUT_TYPES.HIERARCHICAL){
     computeHierarchicalLayout();
   }
-  console.log(currentNetworkLayout)
 }
 
 

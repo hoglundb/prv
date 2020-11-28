@@ -119,6 +119,11 @@ async function addEventListeners(){
 
   });
 
+  //event listener for the course depth dropdown
+  document.getElementById("courseDepthDropdown").addEventListener("change", async function(e){
+     generateNetwork();
+  });
+
   //event listener for the subjectAreaDropdown
   document.getElementById("networkTypeDropdown").addEventListener("change",  async function(e){
 
